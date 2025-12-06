@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order History | Khan Enterprize</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;600&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #2563eb; --secondary: #1e293b; --accent: #f59e0b; --bg-color: #f8fafc; --white: #ffffff; --danger: #ef4444; --success: #22c55e; }
+        body { font-family: 'Poppins', 'Hind Siliguri', sans-serif; margin: 0; padding: 0; background-color: var(--bg-color); color: #333; }
+        nav { background: var(--white); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; }
+        .logo { font-size: 24px; font-weight: 800; color: var(--secondary); text-transform: uppercase; letter-spacing: 1px; text-decoration: none; }
+        .container { max-width: 1200px; margin: auto; padding: 20px; }
+        .table-container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        th, td { padding: 15px; border-bottom: 1px solid #eee; text-align: left; }
+        th { background: #f1f5f9; color: var(--secondary); font-weight: 700; }
+        tr:hover { background-color: #f8fafc; }
+        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; display: inline-block; }
+        .status-pending { background: #ffedd5; color: #9a3412; }
+        .status-delivered { background: #dcfce7; color: #166534; }
+        .status-cancelled { background: #fee2e2; color: #991b1b; }
+        .back-btn { padding: 8px 20px; background: var(--secondary); color: white; text-decoration: none; border-radius: 5px; font-weight: 600; font-size: 14px; }
+        .back-btn:hover { background: var(--primary); }
+        select { padding: 5px; border-radius: 4px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="logo">Khan Enterprize</a>
+        <div>
+            <a href="index.html" class="back-btn">← Back to Shop</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2 style="margin-bottom: 20px; border-bottom: 2px solid var(--accent); display: inline-block; padding-bottom: 5px;">My Order History</h2>
+        
+        <div class="table-container">
+            <table id="order-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Customer Info</th>
+                        <th>Address</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th id="action-header">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="order-list"></tbody>
+            </table>
+            <p id="no-orders" style="text-align:center; display:none; padding:20px; color:#666;">No orders found.</p>
+        </div>
+    </div>
+
+    <script>
+        let user = JSON.parse(localStorage.getItem('user'));
+        let orders = JSON.parse(localStorage.getItem('orders')) || [];
+
+        window.onload = function() {
+            if (!user) {
+                alert("Please login to view orders.");
+                window.location.href = "index.html";
+                return;
+            }
+            renderOrders();
+        };
+
+        function renderOrders() {
+            const list = document.getElementById('order-list');
+            const noOrders = document.getElementById('no-orders');
+            const isAdmin = user.role === 'admin';
+            const myOrders = isAdmin ? orders : orders.filter(o => o.userEmail === user.email);
+
+            if (myOrders.length === 0) {
+                list.innerHTML = '';
+                noOrders.style.display = 'block';
+                return;
+            }
+            noOrders.style.display = 'none';
+            
+            if(!isAdmin) document.getElementById('action-header').style.display = 'none';
+
+            list.innerHTML = myOrders.map(o => {
+                let statusColor = '';
+                if(o.status === 'Delivered') statusColor = 'status-delivered';
+                else if(o.status === 'Cancelled') statusColor = 'status-cancelled';
+                else statusColor = 'status-pending';
+                
+                let actionHtml = '';
+                if(isAdmin) {
+                    actionHtml = `
+                        <td>
+                            <select onchange="changeStatus(${o.id}, this.value)">
+                                <option value="Pending" ${o.status==='Pending'?'selected':''}>Pending</option>
+                                <option value="Delivered" ${o.status==='Delivered'?'selected':''}>Delivered</option>
+                                <option value="Cancelled" ${o.status==='Cancelled'?'selected':''}>Cancelled</option>
+                            </select>
+                        </td>
+                    `;
+                }
+
+                return `
+                    <tr>
+                        <td>#${o.id.toString().slice(-6)}</td>
+                        <td>${o.date}</td>
+                        <td>
+                            <strong>${o.userName}</strong><br>
+                            <small>${o.userEmail}</small><br>
+                            <small>${user.phone || ''}</small>
+                        </td>
+                        <td>${o.fullAddr}</td>
+                        <td>${o.items}</td>
+                        <td><strong>${o.total} BDT</strong><br><small>${o.method}</small></td>
+                        <td><span class="status-badge ${statusColor}">${o.status}</span></td>
+                        ${isAdmin ? actionHtml : ''}
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function changeStatus(id, newStatus) {
+            const order = orders.find(o => o.id === id);
+            if(order) {
+                order.status = newStatus;
+                localStorage.setItem('orders', JSON.stringify(orders));
+                renderOrders();
+                alert(`Order #${id} status changed to ${newStatus}`);
+            }
+        }
+    </script>
+</body>
+</html>

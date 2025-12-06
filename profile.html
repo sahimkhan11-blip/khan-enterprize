@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | Khan Enterprize</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;600&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #2563eb; --secondary: #1e293b; --bg-color: #f8fafc; --white: #ffffff; --danger: #ef4444; }
+        body { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; background-color: var(--bg-color); color: #333; }
+        
+        nav { background: var(--white); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .logo { font-size: 24px; font-weight: 800; color: var(--secondary); text-decoration: none; }
+        .back-btn { padding: 8px 20px; background: var(--secondary); color: white; text-decoration: none; border-radius: 5px; font-size: 14px; }
+
+        .container { max-width: 500px; margin: 40px auto; padding: 20px; }
+        
+        /* Profile Header */
+        .profile-header { background: white; padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        
+        .img-container { position: relative; width: 100px; height: 100px; margin: 0 auto 15px; cursor: pointer; }
+        .profile-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); }
+        .camera-icon { position: absolute; bottom: 5px; right: 5px; background: var(--secondary); color: white; border-radius: 50%; width: 25px; height: 25px; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid white; }
+        
+        .user-name { font-size: 22px; font-weight: 700; margin: 0; color: var(--secondary); }
+        .user-email { color: #64748b; font-size: 14px; margin-top: 5px; }
+
+        /* Dashboard Grid */
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        
+        .menu-card { background: white; padding: 20px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 10px rgba(0,0,0,0.03); text-decoration: none; color: #333; border: 1px solid transparent; }
+        .menu-card:hover { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+        
+        .card-icon { font-size: 24px; margin-bottom: 10px; display: block; }
+        .card-title { font-weight: 600; font-size: 14px; }
+
+        /* Logout Specific */
+        .logout-card { color: var(--danger); }
+        .logout-card:hover { border-color: var(--danger); background: #fef2f2; }
+
+        /* Modal for Address */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-content { background: white; width: 90%; max-width: 400px; padding: 25px; border-radius: 12px; position: relative; }
+        .close { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; }
+        textarea { width: 100%; padding: 10px; margin: 15px 0; border: 1px solid #ddd; border-radius: 6px; font-family: sans-serif; box-sizing: border-box; }
+        .save-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="logo">Khan Enterprize</a>
+        <a href="index.html" class="back-btn">Home</a>
+    </nav>
+
+    <div class="container">
+        <div class="profile-header">
+            <div class="img-container" onclick="document.getElementById('fileInput').click()">
+                <img id="profile-pic" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="profile-img">
+                <div class="camera-icon">📷</div>
+            </div>
+            <input type="file" id="fileInput" style="display: none;" accept="image/*" onchange="uploadImage()">
+            
+            <h2 class="user-name" id="display_name">Loading...</h2>
+            <p class="user-email" id="display_email">...</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <a href="orders.html" class="menu-card">
+                <span class="card-icon">📦</span>
+                <span class="card-title">My Orders</span>
+            </a>
+
+            <div class="menu-card" onclick="openAddressModal()">
+                <span class="card-icon">📍</span>
+                <span class="card-title">Delivery Address</span>
+            </div>
+
+            <a href="contact.html" class="menu-card">
+                <span class="card-icon">🎧</span>
+                <span class="card-title">Support</span>
+            </a>
+
+            <div class="menu-card logout-card" onclick="logout()">
+                <span class="card-icon">🚪</span>
+                <span class="card-title">Logout</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="addr-modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddressModal()">&times;</span>
+            <h3 style="margin-top:0;">Update Address</h3>
+            <p style="font-size:13px; color:#666;">This address will be used for delivery.</p>
+            <textarea id="addr-input" rows="4" placeholder="Enter your full address here..."></textarea>
+            <button class="save-btn" onclick="saveAddress()">Save Address</button>
+        </div>
+    </div>
+
+    <script>
+        let user = JSON.parse(localStorage.getItem('user'));
+
+        window.onload = function() {
+            if (!user) {
+                window.location.href = "index.html";
+                return;
+            }
+            loadData();
+        };
+
+        function loadData() {
+            document.getElementById('display_name').innerText = user.name || 'User';
+            document.getElementById('display_email').innerText = user.email || '';
+            
+            // Load saved image if exists
+            if(user.photo) {
+                document.getElementById('profile-pic').src = user.photo;
+            }
+        }
+
+        // --- PROFILE PICTURE LOGIC ---
+        function uploadImage() {
+            const file = document.getElementById('fileInput').files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imgData = e.target.result;
+                    document.getElementById('profile-pic').src = imgData;
+                    
+                    // Save to LocalStorage
+                    user.photo = imgData;
+                    localStorage.setItem('user', JSON.stringify(user));
+                    
+                    // Also update in 'users' array for persistence
+                    updateUserDatabase(user);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // --- ADDRESS LOGIC ---
+        function openAddressModal() {
+            document.getElementById('addr-input').value = user.address || '';
+            document.getElementById('addr-modal').style.display = 'flex';
+        }
+        function closeAddressModal() {
+            document.getElementById('addr-modal').style.display = 'none';
+        }
+
+        function saveAddress() {
+            const newAddr = document.getElementById('addr-input').value;
+            if(newAddr) {
+                user.address = newAddr;
+                localStorage.setItem('user', JSON.stringify(user));
+                updateUserDatabase(user);
+                closeAddressModal();
+                alert("Address Updated Successfully!");
+            } else {
+                alert("Address cannot be empty.");
+            }
+        }
+
+        // Helper to update main database
+        function updateUserDatabase(currentUser) {
+            let users = JSON.parse(localStorage.getItem('users')) || [];
+            const idx = users.findIndex(u => u.email === currentUser.email);
+            if(idx !== -1) {
+                users[idx] = currentUser;
+                localStorage.setItem('users', JSON.stringify(users));
+            }
+        }
+
+        function logout() {
+            if(confirm("Logout?")) {
+                localStorage.removeItem('user');
+                window.location.href = "index.html";
+            }
+        }
+    </script>
+</body>
+</html>

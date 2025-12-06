@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khan Enterprize | Online Shop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;600&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+
+    <style>
+        /* CSS Styles */
+        :root { --primary: #2563eb; --secondary: #1e293b; --accent: #f59e0b; --bg-color: #f8fafc; --white: #ffffff; --danger: #ef4444; --success: #22c55e; }
+        
+        body { font-family: 'Poppins', 'Hind Siliguri', sans-serif; margin: 0; padding: 0; background-color: var(--bg-color); color: #333; }
+        
+        nav { background: var(--white); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; }
+        .logo { font-size: 24px; font-weight: 800; color: var(--secondary); text-transform: uppercase; letter-spacing: 1px; text-decoration: none; }
+        
+        .nav-icons { display: flex; gap: 15px; align-items: center; }
+        .btn-common { padding: 8px 15px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; display: flex; align-items: center; gap: 5px; transition: 0.3s; text-decoration: none; }
+        .cart-btn { background: var(--secondary); color: white; position: relative; }
+        .contact-btn { background: #10b981; color: white; }
+        .badge { background: var(--danger); color: white; font-size: 10px; padding: 2px 6px; border-radius: 50%; position: absolute; top: -8px; right: -8px; }
+        
+        /* Dropdown */
+        .dropdown { position: relative; display: inline-block; }
+        .login-btn { background: transparent; color: var(--secondary); border: 1px solid var(--secondary); min-width: 100px; justify-content: center; }
+        .login-btn:hover { background: var(--secondary); color: white; }
+        .dropdown-content { display: none; position: absolute; right: 0; background-color: #fff; min-width: 180px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 1001; border-radius: 8px; overflow: hidden; margin-top: 5px; }
+        .dropdown-content a { color: black; padding: 12px 16px; text-decoration: none; display: block; font-size: 14px; border-bottom: 1px solid #f1f1f1; }
+        .dropdown-content a:hover { background-color: #f1f5f9; color: var(--primary); }
+        .show { display: block; }
+
+        /* Hero */
+        .hero { background: linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1472851294608-415522f96319?w=1200'); background-size: cover; background-position: center; color: white; text-align: center; padding: 80px 20px; border-radius: 0 0 40px 40px; margin-bottom: 40px; }
+        .hero h1 { font-size: 3rem; margin: 0; }
+        
+        .container { max-width: 1200px; margin: auto; padding: 0 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; margin-bottom: 50px; }
+        
+        /* Product Card */
+        .card { background: white; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0; transition: 0.3s; position: relative; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+        .card img { width: 100%; height: 220px; object-fit: cover; cursor: pointer; background: #f1f5f9; }
+        .card-body { padding: 15px; text-align: center; }
+        .card-title { font-size: 16px; font-weight: 700; cursor: pointer; color: var(--secondary); margin-bottom: 5px; }
+        .card-price { color: var(--primary); font-size: 18px; font-weight: 600; display: block; margin: 5px 0; }
+        
+        .stock-badge { font-size: 12px; padding: 3px 8px; border-radius: 4px; font-weight: 600; display: inline-block; margin-bottom: 10px; }
+        .in-stock { background: #dcfce7; color: #166534; }
+        .out-stock { background: #fee2e2; color: #991b1b; }
+
+        .btn-group { display: flex; gap: 8px; justify-content: center; margin-top: 5px; }
+        .btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; color: white; font-size: 12px; font-weight: 600; transition: 0.2s; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; opacity: 0.7; }
+        .btn-cart { background: var(--secondary); }
+        .btn-buy { background: var(--accent); color: black; }
+        
+        .admin-actions { display: none; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; }
+        .btn-edit { background: #3b82f6; width: 48%; }
+        .btn-delete { background: var(--danger); width: 48%; }
+
+        /* Admin Panel */
+        #admin-panel { display: none; background: #fff; padding: 25px; margin: 20px auto; border: 1px solid #cbd5e1; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); position: relative; }
+        .admin-form { display: grid; grid-template-columns: 1fr 1fr 1fr 2fr auto; gap: 10px; margin-top: 15px; }
+        .form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+
+        /* Image Upload Box Style */
+        .upload-box {
+            border: 2px dashed #cbd5e1;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            background: white;
+            transition: 0.3s;
+            position: relative;
+        }
+        .upload-box:hover { border-color: var(--primary); background: #eff6ff; }
+        .upload-preview { max-width: 100%; max-height: 80px; object-fit: contain; margin-top: 10px; display: none; border-radius: 4px; }
+        
+        /* Modals */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+        .modal-content { background: white; width: 95%; max-width: 500px; padding: 25px; border-radius: 12px; position: relative; max-height: 90vh; overflow-y: auto; }
+        .close { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #94a3b8; }
+        
+        input, textarea, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-family: 'Poppins', sans-serif; background: #fff; }
+        input:read-only { background-color: #f1f5f9; color: #64748b; cursor: not-allowed; }
+        .checkout-btn { width: 100%; padding: 12px; background: var(--secondary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .label-text { font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 4px; display: block; }
+
+        .google-btn { width: 100%; padding: 12px; background: #fff; color: #333; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
+        .google-btn:hover { background: #f8fafc; }
+        .divider { display: flex; align-items: center; margin: 15px 0; color: #888; font-size: 12px; }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #eee; }
+        .divider span { padding: 0 10px; }
+
+        .large-modal { max-width: 800px; }
+        .view-layout { display: flex; flex-direction: column; gap: 20px; }
+        @media(min-width: 768px) { .view-layout { flex-direction: row; } .view-img { width: 45%; } .view-details { width: 55%; } }
+        .view-img { width: 100%; object-fit: contain; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="logo">Khan Enterprize</a>
+        <div class="nav-icons">
+            <a href="contact.html" target="_blank" class="btn-common contact-btn">📞 Contact</a>
+            
+            <div class="dropdown">
+                <button class="btn-common login-btn" onclick="handleAuthBtn()" id="authBtn">Login</button>
+                <div id="userDropdown" class="dropdown-content">
+                    <a href="profile.html">👤 My Profile</a>
+                    <a href="orders.html">📦 My Orders</a>
+                    <a href="#" onclick="logout()" style="color:red;">🚪 Logout</a>
+                </div>
+            </div>
+
+            <div class="btn-common cart-btn" onclick="openCartModal()">Cart <span class="badge" id="cart-count">0</span></div>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1>Welcome to Khan Enterprize</h1>
+        <p>Premium Quality, Best Prices.</p>
+    </div>
+
+    <div class="container" id="admin-panel">
+        <div class="form-header">
+            <h3 style="margin:0;">Admin Dashboard</h3>
+            <div>
+                <a href="orders.html" style="text-decoration:none; background:var(--accent); color:black; padding:8px 15px; border-radius:4px; margin-right:5px; font-weight:bold; font-size:13px;">Manage Orders</a>
+            </div>
+        </div>
+        <div style="background:#f1f5f9; padding:15px; border-radius:8px;">
+            <h4 style="margin-top:0; margin-bottom:10px;" id="form-title">Add New Product</h4>
+            <input type="hidden" id="edit_id">
+            <div class="admin-form">
+                <input type="text" id="p_name" placeholder="Product Name">
+                <input type="number" id="p_price" placeholder="Price">
+                <select id="p_status"><option value="true">In Stock</option><option value="false">Out of Stock</option></select>
+                
+                <div class="upload-box" onclick="document.getElementById('p_img_file').click()">
+                    <span id="upload-text">📷 Upload Product Image</span>
+                    <input type="file" id="p_img_file" accept="image/*" style="display:none;" onchange="handleImageUpload(this)">
+                    <img id="p_img_preview" class="upload-preview">
+                </div>
+
+                <input type="text" id="p_desc" placeholder="Details (Bangla)">
+            </div>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <button id="addBtn" onclick="addProduct()" style="background:var(--primary); color:white; border:none; border-radius:4px; cursor:pointer; padding:10px 20px; font-weight:bold;">Add Product</button>
+                <button id="updateBtn" onclick="updateProduct()" style="background:var(--success); color:white; border:none; border-radius:4px; cursor:pointer; padding:10px 20px; font-weight:bold; display:none;">Update Product</button>
+                <button id="cancelBtn" onclick="resetForm()" style="background:#64748b; color:white; border:none; border-radius:4px; cursor:pointer; padding:10px 20px; font-weight:bold; display:none;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2 style="text-align:center; margin-bottom:30px; font-weight: 700;">Featured Collection</h2>
+        <div class="grid" id="product-grid"></div>
+    </div>
+
+    <div class="modal" id="view-modal">
+        <div class="modal-content large-modal">
+            <span class="close" onclick="closeView()">&times;</span>
+            <div class="view-layout">
+                <img id="v-img" class="view-img" src="">
+                <div class="view-details">
+                    <h2 id="v-name"></h2>
+                    <h3 id="v-price" style="color:var(--primary);"></h3>
+                    <div id="v-stock" style="margin-bottom:10px;"></div>
+                    <p id="v-desc" style="background:#f1f5f9; padding:15px; border-radius:8px; font-family:'Hind Siliguri';"></p>
+                    <div class="btn-group" id="v-btns" style="justify-content:start;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="auth-modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAuth()">&times;</span>
+            <h3 style="text-align:center;">Account Access</h3>
+            <p id="login-msg" style="color:red; text-align:center; display:none; font-size:12px;">⚠ Please login to complete your order.</p>
+            <div style="display:flex; gap:10px; margin-bottom:15px; border-bottom:1px solid #eee;">
+                <div onclick="tab('login')" style="flex:1; text-align:center; padding:10px; cursor:pointer; font-weight:bold;">Login</div>
+                <div onclick="tab('reg')" style="flex:1; text-align:center; padding:10px; cursor:pointer;">Register</div>
+            </div>
+            <div id="login-form">
+                <input type="email" id="l_email" placeholder="Email">
+                <input type="password" id="l_pass" placeholder="Password">
+                <button class="checkout-btn" onclick="login()">Login</button>
+                <div class="divider"><span>OR</span></div>
+                <button class="google-btn" onclick="googleLogin()"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"> Sign in with Google</button>
+            </div>
+            <div id="reg-form" style="display:none;">
+                <input type="text" id="r_name" placeholder="Full Name">
+                <input type="email" id="r_email" placeholder="Email">
+                <input type="password" id="r_pass" placeholder="Password">
+                <button class="checkout-btn" onclick="reg()">Register</button>
+                <div class="divider"><span>OR</span></div>
+                <button class="google-btn" onclick="googleLogin()"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"> Sign up with Google</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="cart-modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCheckoutModal()">&times;</span>
+            <h3 id="checkout-title">Checkout</h3>
+            <div id="cart-items" style="max-height:150px; overflow-y:auto; border-bottom:1px solid #eee; margin-bottom:10px;"></div>
+            <h4 style="text-align:right; margin-bottom: 15px;">Total: <span id="total">0</span> BDT</h4>
+            <div style="background:#f8fafc; padding:15px; border-radius:8px; border: 1px solid #e2e8f0;">
+                <input type="text" id="c_name" placeholder="Full Name">
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="c_phone" placeholder="Phone" style="flex:1;">
+                    <input type="email" id="c_email" placeholder="Email" style="flex:1;">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" value="Bangladesh" readonly style="flex:1;">
+                    <select id="c_district" onchange="loadUpazilas()" style="flex:1;"><option value="">Select District</option></select>
+                </div>
+                <select id="c_upazila" disabled><option value="">Select District First</option></select>
+                <textarea id="c_addr" placeholder="Detailed Address"></textarea>
+                <select id="c_method"><option value="COD">Cash on Delivery</option><option value="Bkash">Bkash</option><option value="Nagad">Nagad</option></select>
+                <input type="text" id="c_note" placeholder="Delivery Note (Optional)">
+                <button class="checkout-btn" style="background:var(--primary);" onclick="order()">Confirm Order</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA SETUP ---
+        const defaults = [
+            { id: 1, name: "Premium Leather Watch", price: 2500, inStock: true, img: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=600", desc: "Premium waterproof leather watch with 1 year warranty." },
+            { id: 2, name: "Executive Leather Bag", price: 3200, inStock: false, img: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600", desc: "Genuine leather office bag with laptop compartment." },
+            { id: 3, name: "Pro Wireless Earbuds", price: 1800, inStock: true, img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600", desc: "Noise cancelling earbuds with 6 hours battery." },
+            { id: 4, name: "Running Sneakers", price: 2100, inStock: true, img: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=600", desc: "Comfortable running shoes with rubber sole." },
+        ];
+
+        let products = JSON.parse(localStorage.getItem('products'));
+        if (!products || products.length === 0) { products = defaults; localStorage.setItem('products', JSON.stringify(products)); }
+
+        const bdLocations = {
+            "Dhaka": ["Savar", "Dhamrai", "Keraniganj", "Nawabganj", "Dohar", "Tejgaon", "Gulshan", "Mirpur", "Mohammadpur", "Dhanmondi", "Uttara", "Ramna", "Motijheel"],
+            "Chattogram": ["Chattogram Sadar", "Sitakunda", "Mirsharai", "Patiya", "Karnaphuli", "Lohagara", "Satkania", "Boalkhali", "Chandanaish", "Raozan"],
+            "Sylhet": ["Sylhet Sadar", "Beanibazar", "Bishwanath", "Dakshin Surma", "Balaganj", "Companiganj", "Fenchuganj", "Golapganj"],
+            "Rajshahi": ["Rajshahi Sadar", "Boalia", "Motihar", "Shah Makhdum", "Paba", "Bagha", "Charghat", "Durgapur", "Godagari"],
+            "Khulna": ["Khulna Sadar", "Terokhada", "Batiaghata", "Dacope", "Dumuria", "Dighalia", "Koyra", "Paikgachha"],
+            "Barishal": ["Barishal Sadar", "Bakerganj", "Babuganj", "Wazirpur", "Banaripara", "Gournadi", "Agailjhara"],
+            "Rangpur": ["Rangpur Sadar", "Gangachara", "Taragonj", "Badarganj", "Mithapukur", "Pirganj", "Kaunia"],
+            "Mymensingh": ["Mymensingh Sadar", "Muktagachha", "Valuka", "Haluaghat", "Gouripur", "Dhobaura", "Fulbaria"]
+        };
+
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let user = JSON.parse(localStorage.getItem('user'));
+        let orders = JSON.parse(localStorage.getItem('orders')) || [];
+        let isDirectBuy = false;
+        let directItem = null;
+        let currentImageBase64 = ""; // Store uploaded image
+
+        // --- FIREBASE CONFIG ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBxJai8n3-S1Lwh4Ndyobk0VTjXVbyJkPw",
+            authDomain: "khan-enterprize.firebaseapp.com",
+            projectId: "khan-enterprize",
+            storageBucket: "khan-enterprize.firebasestorage.app",
+            messagingSenderId: "876213493796",
+            appId: "1:876213493796:web:ad9f8cdb93ceeba76e78b1",
+            measurementId: "G-BMEQDVNJ6J"
+        };
+        try { firebase.initializeApp(firebaseConfig); } catch(e) { console.error(e); }
+
+        // --- UI FUNCTIONS ---
+        function init() {
+            const distSelect = document.getElementById('c_district');
+            if(distSelect) {
+                Object.keys(bdLocations).sort().forEach(d => {
+                    let opt = document.createElement('option'); opt.value = d; opt.innerText = d; distSelect.appendChild(opt);
+                });
+            }
+            render();
+            // Close dropdown if clicked outside
+            window.onclick = function(event) {
+                if (!event.target.matches('.login-btn')) {
+                    var dropdowns = document.getElementsByClassName("dropdown-content");
+                    for (var i = 0; i < dropdowns.length; i++) {
+                        var openDropdown = dropdowns[i];
+                        if (openDropdown.classList.contains('show')) {
+                            openDropdown.classList.remove('show');
+                        }
+                    }
+                }
+            }
+        }
+
+        function handleAuthBtn() {
+            if(user) {
+                document.getElementById("userDropdown").classList.toggle("show");
+            } else {
+                openAuthModal();
+            }
+        }
+
+        function loadUpazilas() {
+            const dist = document.getElementById('c_district').value;
+            const upaSelect = document.getElementById('c_upazila');
+            upaSelect.innerHTML = '<option value="">Select Upazila</option>';
+            if(dist && bdLocations[dist]) {
+                upaSelect.disabled = false;
+                bdLocations[dist].sort().forEach(u => {
+                    let opt = document.createElement('option'); opt.value = u; opt.innerText = u; upaSelect.appendChild(opt);
+                });
+            } else { upaSelect.disabled = true; }
+        }
+
+        function render() {
+            const grid = document.getElementById('product-grid');
+            if(!grid) return;
+            const isAdmin = user && user.role === 'admin';
+            
+            grid.innerHTML = products.map(p => {
+                let inStock = (typeof p.inStock === 'boolean') ? p.inStock : (p.stock > 0);
+                const stockLabel = inStock ? `<span class="stock-badge in-stock">In Stock</span>` : `<span class="stock-badge out-stock">Out of Stock</span>`;
+                const btnState = inStock ? '' : 'disabled';
+                const btnText = inStock ? 'Add to Cart' : 'Sold Out';
+
+                return `
+                <div class="card">
+                    <img src="${p.img}" onclick="view(${p.id})" onerror="this.src='https://via.placeholder.com/300?text=Khan+Enterprize'">
+                    <div class="card-body">
+                        <div class="card-title" onclick="view(${p.id})">${p.name}</div>
+                        ${stockLabel}
+                        <span class="card-price">${p.price} BDT</span>
+                        <div class="btn-group">
+                            <button class="btn btn-cart" onclick="addToCart(${p.id})" ${btnState}>${btnText}</button>
+                            <button class="btn btn-buy" onclick="buyNow(${p.id})" ${btnState}>Buy Now</button>
+                        </div>
+                        <div class="admin-actions" style="display:${isAdmin?'flex':'none'}; justify-content:space-between;">
+                            <button class="btn btn-edit" onclick="editProduct(${p.id})">Edit</button>
+                            <button class="btn btn-delete" onclick="del(${p.id})">Delete</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+            document.getElementById('cart-count').innerText = cart.length;
+            updateNav();
+        }
+
+        function updateNav() {
+            const authBtn = document.getElementById('authBtn');
+            const adminPanel = document.getElementById('admin-panel');
+            if(user) {
+                authBtn.innerText = `👤 ${user.name} ▼`;
+                authBtn.style.minWidth = "140px";
+                adminPanel.style.display = user.role === 'admin' ? 'block' : 'none';
+            } else {
+                authBtn.innerText = "Login";
+                authBtn.style.minWidth = "80px";
+                adminPanel.style.display = 'none';
+            }
+        }
+
+        function addToCart(id) {
+            const p = products.find(x => x.id === id);
+            cart.push(p); localStorage.setItem('cart', JSON.stringify(cart)); render(); alert("Added to Cart!");
+        }
+
+        function buyNow(id) {
+            const p = products.find(x => x.id === id);
+            isDirectBuy = true; directItem = p; openCheckoutModal();
+        }
+
+        function openCartModal() {
+            if(cart.length === 0) return alert("Cart is empty");
+            isDirectBuy = false; directItem = null; openCheckoutModal();
+        }
+
+        function openCheckoutModal() {
+            document.getElementById('cart-modal').style.display = 'flex';
+            updateCheckoutList();
+            if(user) {
+                document.getElementById('c_name').value = user.name || '';
+                if(user.phone) document.getElementById('c_phone').value = user.phone;
+                if(user.email) document.getElementById('c_email').value = user.email;
+                if(user.address) document.getElementById('c_addr').value = user.address;
+            }
+            document.getElementById('checkout-title').innerText = isDirectBuy ? "Buy Now" : "Checkout Cart";
+        }
+        
+        function closeCheckoutModal() { document.getElementById('cart-modal').style.display = 'none'; }
+
+        function updateCheckoutList() {
+            let total = 0;
+            const list = document.getElementById('cart-items');
+            const itemsToShow = isDirectBuy ? [directItem] : cart;
+            list.innerHTML = itemsToShow.map((i, idx) => {
+                total += i.price;
+                const delBtn = isDirectBuy ? '' : `<b style="color:red; cursor:pointer;" onclick="rem(${idx})">✖</b>`;
+                return `<div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:14px;"><span>${i.name}</span><span>${i.price} ${delBtn}</span></div>`;
+            }).join('');
+            document.getElementById('total').innerText = total;
+        }
+
+        function rem(i) { 
+            if(!isDirectBuy) {
+                cart.splice(i, 1); localStorage.setItem('cart', JSON.stringify(cart)); render(); updateCheckoutList();
+                if(cart.length === 0) closeCheckoutModal();
+            }
+        }
+
+        function view(id) {
+            const p = products.find(x => x.id === id);
+            let inStock = (typeof p.inStock === 'boolean') ? p.inStock : (p.stock > 0);
+            document.getElementById('v-img').src = p.img;
+            document.getElementById('v-name').innerText = p.name;
+            document.getElementById('v-price').innerText = p.price + " BDT";
+            document.getElementById('v-desc').innerText = p.desc || "No details.";
+            document.getElementById('v-stock').innerHTML = inStock ? `<span class="stock-badge in-stock">In Stock</span>` : `<span class="stock-badge out-stock">Out of Stock</span>`;
+            const btnState = inStock ? '' : 'disabled';
+            document.getElementById('v-btns').innerHTML = `<button class="btn btn-cart" onclick="addToCart(${p.id}); closeView()" ${btnState}>Add to Cart</button><button class="btn btn-buy" onclick="buyNow(${p.id}); closeView()" ${btnState}>Buy Now</button>`;
+            document.getElementById('view-modal').style.display = 'flex';
+        }
+        function closeView() { document.getElementById('view-modal').style.display = 'none'; }
+
+        function order() {
+            if(!user) { closeCheckoutModal(); document.getElementById('login-msg').style.display = 'block'; openAuthModal(); return; }
+            const n = document.getElementById('c_name').value;
+            const p = document.getElementById('c_phone').value;
+            const e = document.getElementById('c_email').value;
+            const addr = document.getElementById('c_addr').value;
+            if(!n || !p || !e || !addr) return alert("Please fill contact info and address.");
+
+            user.phone = p; user.email = e; user.address = addr;
+            localStorage.setItem('user', JSON.stringify(user));
+            
+            const orderItems = isDirectBuy ? [directItem] : cart;
+            let total = 0, itemStr = "";
+            orderItems.forEach(i => { total += i.price; itemStr += `${i.name}, `; });
+
+            const newOrder = { id: Date.now(), userEmail: user.email, userName: n, items: itemStr, total: total, fullAddr: addr, status: 'Pending', date: new Date().toLocaleDateString() };
+            orders.unshift(newOrder); localStorage.setItem('orders', JSON.stringify(orders));
+
+            const msg = `New Order #${newOrder.id}\nUser: ${n}\nPhone: ${p}\nItems: ${itemStr}\nTotal: ${total}\nAddr: ${addr}`;
+            window.open(`https://wa.me/8801700000000?text=${encodeURIComponent(msg)}`);
+
+            if(!isDirectBuy) { cart = []; localStorage.setItem('cart', JSON.stringify(cart)); render(); }
+            closeCheckoutModal(); alert("Order Placed!"); window.location.href = "orders.html";
+        }
+
+        // --- AUTH ---
+        function openAuthModal() { document.getElementById('auth-modal').style.display = 'flex'; }
+        function closeAuth() { document.getElementById('auth-modal').style.display = 'none'; }
+        function tab(t) {
+            document.getElementById('login-form').style.display = t==='login'?'block':'none';
+            document.getElementById('reg-form').style.display = t==='reg'?'block':'none';
+        }
+        function login() {
+            const e = document.getElementById('l_email').value;
+            const p = document.getElementById('l_pass').value;
+            if(e === 'sahimkhan11@gmail.com' && p === '1234') { user = { name:'Admin', email:e, role:'admin' }; }
+            else {
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                user = users.find(u => u.email === e && u.pass === p);
+                if(user) user.role = 'user'; else return alert("Invalid");
+            }
+            localStorage.setItem('user', JSON.stringify(user)); closeAuth(); render();
+        }
+        function reg() {
+            const n = document.getElementById('r_name').value; const e = document.getElementById('r_email').value; const p = document.getElementById('r_pass').value;
+            if(!n || !e || !p) return alert("Fill all fields");
+            let users = JSON.parse(localStorage.getItem('users')) || []; users.push({name:n, email:e, pass:p});
+            localStorage.setItem('users', JSON.stringify(users)); alert("Registered!"); tab('login');
+        }
+        function googleLogin() {
+            if (!firebase) return alert("Firebase not loaded");
+            const provider = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithPopup(provider)
+                .then((result) => {
+                    const u = result.user;
+                    user = { name: u.displayName, email: u.email, role: u.email === 'sahimkhan11@gmail.com' ? 'admin' : 'user' };
+                    localStorage.setItem('user', JSON.stringify(user)); closeAuth(); render();
+                }).catch((error) => alert(error.message));
+        }
+        function logout() { localStorage.removeItem('user'); user = null; render(); }
+
+        // --- ADMIN (IMAGE UPLOAD) ---
+        function handleImageUpload(input) {
+            const file = input.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentImageBase64 = e.target.result;
+                    const preview = document.getElementById('p_img_preview');
+                    preview.src = currentImageBase64;
+                    preview.style.display = 'inline-block';
+                    document.getElementById('upload-text').innerText = "Image Selected ✅";
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function addProduct() {
+            const n = document.getElementById('p_name').value;
+            const p = document.getElementById('p_price').value;
+            const s = document.getElementById('p_status').value === 'true';
+            // Use uploaded image OR image URL text input (if exists, though I removed it for UI clean up, using Base64 now)
+            const i = currentImageBase64 || "https://via.placeholder.com/300"; 
+            const d = document.getElementById('p_desc').value;
+            
+            if(n && p) {
+                products.push({ id: Date.now(), name: n, price: parseInt(p), inStock: s, img: i, desc: d });
+                localStorage.setItem('products', JSON.stringify(products)); render(); resetForm(); alert("Product Added!");
+            } else { alert("Please fill Name and Price"); }
+        }
+
+        function editProduct(id) {
+            const p = products.find(x => x.id === id);
+            if(p) {
+                document.getElementById('p_name').value = p.name;
+                document.getElementById('p_price').value = p.price;
+                currentImageBase64 = p.img;
+                document.getElementById('p_img_preview').src = p.img;
+                document.getElementById('p_img_preview').style.display = 'inline-block';
+                
+                document.getElementById('p_desc').value = p.desc;
+                document.getElementById('p_status').value = p.inStock ? 'true' : 'false';
+                document.getElementById('edit_id').value = id;
+                document.getElementById('addBtn').style.display='none';
+                document.getElementById('updateBtn').style.display='inline';
+                document.getElementById('cancelBtn').style.display='inline';
+                document.getElementById('form-title').innerText = "Edit Product";
+                document.getElementById('admin-panel').scrollIntoView();
+            }
+        }
+
+        function updateProduct() {
+            const id = parseInt(document.getElementById('edit_id').value);
+            const n = document.getElementById('p_name').value;
+            const p = document.getElementById('p_price').value;
+            const s = document.getElementById('p_status').value === 'true';
+            const i = currentImageBase64;
+            const d = document.getElementById('p_desc').value;
+            const idx = products.findIndex(x => x.id === id);
+            if(idx > -1) {
+                products[idx] = { id: id, name: n, price: parseInt(p), inStock: s, img: i, desc: d };
+                localStorage.setItem('products', JSON.stringify(products)); render(); resetForm(); alert("Product Updated!");
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('p_name').value = ''; document.getElementById('p_price').value = '';
+            document.getElementById('p_desc').value = ''; currentImageBase64 = "";
+            document.getElementById('p_img_preview').style.display = 'none';
+            document.getElementById('upload-text').innerText = "📷 Upload Product Image";
+            document.getElementById('edit_id').value = '';
+            document.getElementById('addBtn').style.display='inline'; document.getElementById('updateBtn').style.display='none';
+            document.getElementById('cancelBtn').style.display='none'; document.getElementById('form-title').innerText = "Add New Product";
+        }
+
+        function del(id) {
+            if(confirm("Delete?")) { products = products.filter(p => p.id !== id); localStorage.setItem('products', JSON.stringify(products)); render(); }
+        }
+
+        init();
+    </script>
+</body>
+</html>
