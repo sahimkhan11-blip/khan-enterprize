@@ -12,78 +12,52 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
 
     <style>
-        /* CSS Styles */
-        :root { --primary: #2563eb; --secondary: #1e293b; --accent: #f59e0b; --bg-color: #f8fafc; --white: #ffffff; --danger: #ef4444; --success: #22c55e; }
-        body { font-family: 'Poppins', 'Hind Siliguri', sans-serif; margin: 0; padding: 0; background-color: var(--bg-color); color: #333; }
+        :root { --primary: #2563eb; --secondary: #1e293b; --accent: #f59e0b; --bg-color: #f8fafc; --white: #ffffff; --danger: #ef4444; }
+        body { font-family: 'Poppins', sans-serif; margin: 0; background: var(--bg-color); color: #333; }
         
-        nav { background: var(--white); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; }
-        .logo { font-size: 24px; font-weight: 800; color: var(--secondary); text-transform: uppercase; letter-spacing: 1px; text-decoration: none; }
+        nav { background: var(--white); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; }
+        .logo { font-size: 24px; font-weight: 800; color: var(--secondary); text-decoration: none; }
         .nav-icons { display: flex; gap: 15px; align-items: center; }
-        .btn-common { padding: 8px 15px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; display: flex; align-items: center; gap: 5px; transition: 0.3s; text-decoration: none; }
-        .cart-btn { background: var(--secondary); color: white; position: relative; }
+        .btn-common { padding: 8px 15px; border-radius: 6px; cursor: pointer; border: none; display: flex; align-items: center; gap: 5px; text-decoration: none; font-weight: 600; font-size: 13px; }
         .contact-btn { background: #10b981; color: white; }
-        
-        /* Badges */
-        .badge { background: var(--danger); color: white; font-size: 10px; padding: 2px 6px; border-radius: 50%; position: absolute; top: -8px; right: -8px; }
-        
-        /* NOTIFICATION STYLES (NEW) */
+        .cart-btn { background: var(--secondary); color: white; position: relative; }
+        .badge { background: red; color: white; font-size: 10px; padding: 2px 6px; border-radius: 50%; position: absolute; top: -8px; right: -8px; }
+
+        /* Notification */
         .noti-btn { font-size: 20px; cursor: pointer; position: relative; }
         .noti-badge { background: red; color: white; font-size: 9px; padding: 2px 5px; border-radius: 50%; position: absolute; top: -5px; right: -5px; display: none; }
-        
-        .noti-dropdown {
-            display: none;
-            position: absolute;
-            top: 60px;
-            right: 5%;
-            background: white;
-            width: 300px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border-radius: 8px;
-            z-index: 2000;
-            border: 1px solid #eee;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        .noti-header { padding: 10px 15px; border-bottom: 1px solid #eee; font-weight: bold; background: #f8fafc; display:flex; justify-content:space-between; align-items:center; }
-        .noti-item { padding: 15px; border-bottom: 1px solid #f1f1f1; font-size: 13px; transition: 0.2s; position: relative; }
+        .noti-dropdown { display: none; position: absolute; top: 60px; right: 5%; background: white; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-radius: 8px; z-index: 2000; border: 1px solid #eee; }
+        .noti-item { padding: 15px; border-bottom: 1px solid #f1f1f1; font-size: 13px; cursor: pointer; }
         .noti-item:hover { background: #f8fafc; }
         .noti-item.unread { background: #eff6ff; border-left: 3px solid var(--primary); }
-        .noti-time { font-size: 10px; color: #888; display: block; margin-top: 5px; }
-        .close-noti { cursor: pointer; color: red; font-size: 12px; }
 
-        /* Dropdown & General */
+        /* Login Dropdown */
         .dropdown { position: relative; display: inline-block; }
-        .login-btn { background: transparent; color: var(--secondary); border: 1px solid var(--secondary); min-width: 100px; justify-content: center; }
-        .dropdown-content { display: none; position: absolute; right: 0; background-color: #fff; min-width: 180px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 1001; border-radius: 8px; margin-top: 5px; }
-        .dropdown-content a { color: black; padding: 12px 16px; text-decoration: none; display: block; font-size: 14px; border-bottom: 1px solid #f1f1f1; }
+        .login-btn { background: transparent; border: 1px solid var(--secondary); min-width: 100px; justify-content: center; }
+        .dropdown-content { display: none; position: absolute; right: 0; background: white; min-width: 180px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); z-index: 1001; border-radius: 8px; }
+        .dropdown-content a { padding: 12px; display: block; color: black; text-decoration: none; font-size: 14px; border-bottom: 1px solid #f1f1f1; }
         .show { display: block; }
 
-        .hero { background: linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1472851294608-415522f96319?w=1200'); background-size: cover; background-position: center; color: white; text-align: center; padding: 80px 20px; border-radius: 0 0 40px 40px; margin-bottom: 40px; }
-        .hero h1 { font-size: 3rem; margin: 0; }
+        /* Product Grid */
+        .hero { background: linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1472851294608-415522f96319?w=1200'); background-size: cover; color: white; text-align: center; padding: 80px 20px; border-radius: 0 0 40px 40px; margin-bottom: 40px; }
         .container { max-width: 1200px; margin: auto; padding: 0 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; margin-bottom: 50px; }
-        .card { background: white; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0; transition: 0.3s; position: relative; }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+        .card { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.3s; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .card img { width: 100%; height: 220px; object-fit: cover; }
         .card-body { padding: 15px; text-align: center; }
-        .stock-badge { font-size: 12px; padding: 3px 8px; border-radius: 4px; font-weight: 600; display: inline-block; margin-bottom: 10px; }
-        .in-stock { background: #dcfce7; color: #166534; }
-        .out-stock { background: #fee2e2; color: #991b1b; }
-        .btn-group { display: flex; gap: 8px; justify-content: center; margin-top: 5px; }
-        .btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; color: white; font-weight: 600; }
+        .card-price { color: var(--primary); font-size: 18px; font-weight: bold; display: block; margin: 5px 0; }
+        .btn-group { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
+        .btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; color: white; font-weight: 600; font-size: 12px; }
         .btn-cart { background: var(--secondary); } .btn-buy { background: var(--accent); color: black; }
-        
+
         /* Modals */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); z-index: 2000; justify-content: center; align-items: center; }
-        .modal-content { background: white; width: 95%; max-width: 500px; padding: 25px; border-radius: 12px; position: relative; max-height: 90vh; overflow-y: auto; }
-        .close { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #94a3b8; }
-        input, textarea, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
-        .checkout-btn { width: 100%; padding: 12px; background: var(--secondary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
-        .google-btn { width: 100%; padding: 12px; background: #fff; color: #333; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
-        .large-modal { max-width: 800px; }
-        .view-layout { display: flex; flex-direction: column; gap: 20px; }
-        @media(min-width: 768px) { .view-layout { flex-direction: row; } .view-img { width: 45%; } .view-details { width: 55%; } }
-        .view-img { width: 100%; object-fit: contain; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-content { background: white; width: 95%; max-width: 450px; padding: 25px; border-radius: 10px; position: relative; }
+        .close { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; }
+        input, textarea, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        .checkout-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .google-btn { width: 100%; padding: 10px; background: white; border: 1px solid #ccc; margin-top: 10px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; border-radius: 6px; }
     </style>
 </head>
 <body>
@@ -95,6 +69,10 @@
             
             <div class="noti-btn" onclick="toggleNotification()">
                 🔔 <span id="noti-count" class="noti-badge">0</span>
+                <div id="noti-dropdown" class="noti-dropdown">
+                    <div style="padding:10px; border-bottom:1px solid #eee; font-weight:bold;">Notifications</div>
+                    <div id="noti-list"><p style="padding:15px; text-align:center; color:#888;">No notifications</p></div>
+                </div>
             </div>
 
             <div class="dropdown">
@@ -105,20 +83,9 @@
                     <a href="#" onclick="logout()" style="color:red;">🚪 Logout</a>
                 </div>
             </div>
-
             <div class="btn-common cart-btn" onclick="openCartModal()">Cart <span class="badge" id="cart-count">0</span></div>
         </div>
     </nav>
-
-    <div id="noti-dropdown" class="noti-dropdown">
-        <div class="noti-header">
-            Notifications 
-            <span class="close-noti" onclick="toggleNotification()">✖</span>
-        </div>
-        <div id="noti-list">
-            <p style="padding:15px; text-align:center; color:#888;">No notifications</p>
-        </div>
-    </div>
 
     <div class="hero">
         <h1>Welcome to Khan Enterprize</h1>
@@ -127,22 +94,8 @@
 
     <div class="container">
         <h2 style="text-align:center; margin-bottom:30px; font-weight: 700;">Featured Collection</h2>
-        <div class="grid" id="product-grid"><p style="text-align:center; width:100%;">Loading Products...</p></div>
-    </div>
-
-    <div class="modal" id="view-modal">
-        <div class="modal-content large-modal">
-            <span class="close" onclick="closeView()">&times;</span>
-            <div class="view-layout">
-                <img id="v-img" class="view-img" src="">
-                <div class="view-details">
-                    <h2 id="v-name"></h2>
-                    <h3 id="v-price" style="color:var(--primary);"></h3>
-                    <div id="v-stock" style="margin-bottom:10px;"></div>
-                    <p id="v-desc" style="background:#f1f5f9; padding:15px; border-radius:8px;"></p>
-                    <div class="btn-group" id="v-btns" style="justify-content:start;"></div>
-                </div>
-            </div>
+        <div class="grid" id="product-grid">
+            <p style="text-align:center; width:100%;">Loading Products...</p>
         </div>
     </div>
 
@@ -150,53 +103,25 @@
         <div class="modal-content">
             <span class="close" onclick="closeAuth()">&times;</span>
             <h3 style="text-align:center;">Account Access</h3>
-            <div style="display:flex; gap:10px; margin-bottom:15px; border-bottom:1px solid #eee;">
-                <div onclick="tab('login')" style="flex:1; text-align:center; padding:10px; cursor:pointer; font-weight:bold;">Login</div>
-                <div onclick="tab('reg')" style="flex:1; text-align:center; padding:10px; cursor:pointer;">Register</div>
-            </div>
-            <div id="login-form">
-                <input type="email" id="l_email" placeholder="Email">
-                <input type="password" id="l_pass" placeholder="Password">
-                <button class="checkout-btn" onclick="login()">Login</button>
-                <button class="google-btn" onclick="googleLogin()"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"> Sign in with Google</button>
-            </div>
-            <div id="reg-form" style="display:none;">
-                <input type="text" id="r_name" placeholder="Full Name">
-                <input type="email" id="r_email" placeholder="Email">
-                <input type="password" id="r_pass" placeholder="Password">
-                <button class="checkout-btn" onclick="reg()">Register</button>
-                <button class="google-btn" onclick="googleLogin()"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"> Sign up with Google</button>
-            </div>
+            <input type="email" id="l_email" placeholder="Email"><input type="password" id="l_pass" placeholder="Password">
+            <button class="checkout-btn" onclick="login()">Login with Admin/Email</button>
+            <button class="google-btn" onclick="googleLogin()">Sign in with Google</button>
         </div>
     </div>
 
     <div class="modal" id="cart-modal">
         <div class="modal-content">
             <span class="close" onclick="closeCheckoutModal()">&times;</span>
-            <h3 id="checkout-title">Checkout</h3>
-            <div id="cart-items" style="max-height:150px; overflow-y:auto; border-bottom:1px solid #eee; margin-bottom:10px;"></div>
-            <h4 style="text-align:right; margin-bottom: 15px;">Total: <span id="total">0</span> BDT</h4>
-            <div style="background:#f8fafc; padding:15px; border-radius:8px; border: 1px solid #e2e8f0;">
-                <input type="text" id="c_name" placeholder="Full Name">
-                <div style="display:flex; gap:10px;">
-                    <input type="text" id="c_phone" placeholder="Phone" style="flex:1;">
-                    <input type="email" id="c_email" placeholder="Email" style="flex:1;">
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" value="Bangladesh" readonly style="flex:1;">
-                    <select id="c_district" onchange="loadUpazilas()" style="flex:1;"><option value="">Select District</option></select>
-                </div>
-                <select id="c_upazila" disabled><option value="">Select District First</option></select>
-                <textarea id="c_addr" placeholder="Detailed Address"></textarea>
-                <select id="c_method"><option value="COD">Cash on Delivery</option><option value="Bkash">Bkash</option><option value="Nagad">Nagad</option></select>
-                <input type="text" id="c_note" placeholder="Delivery Note (Optional)">
-                <button class="checkout-btn" style="background:var(--primary);" onclick="order()">Confirm Order</button>
-            </div>
+            <h3>Checkout</h3>
+            <div id="cart-items" style="max-height:150px; overflow-y:auto; margin-bottom:10px;"></div>
+            <h4 style="text-align:right;">Total: <span id="total">0</span> BDT</h4>
+            <input type="text" id="c_name" placeholder="Name"><input type="text" id="c_phone" placeholder="Phone"><input type="text" id="c_addr" placeholder="Address">
+            <button class="checkout-btn" onclick="order()">Confirm Order</button>
         </div>
     </div>
 
     <script>
-        // --- CONFIG ---
+        // --- FIREBASE CONFIG ---
         const firebaseConfig = {
             apiKey: "AIzaSyBxJai8n3-S1Lwh4Ndyobk0VTjXVbyJkPw",
             authDomain: "khan-enterprize.firebaseapp.com",
@@ -210,12 +135,106 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
-        // --- VARS ---
-        let products = [], cart = JSON.parse(localStorage.getItem('cart')) || [], user = JSON.parse(localStorage.getItem('user'));
-        let isDirectBuy = false, directItem = null;
-        const bdLocations = { "Dhaka": ["Savar", "Gulshan", "Mirpur"], "Chattogram": ["Sadar", "Patiya"], "Sylhet": ["Sadar"], "Rajshahi": ["Sadar"], "Khulna": ["Sadar"] };
+        // --- DEFAULTS (Fallback if DB fails) ---
+        const defaults = [
+            { id: "1", name: "Premium Watch", price: 2500, inStock: true, img: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=600" },
+            { id: "2", name: "Leather Bag", price: 3200, inStock: true, img: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600" },
+            { id: "3", name: "Wireless Earbuds", price: 1800, inStock: true, img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600" }
+        ];
 
-        // --- INIT ---
+        let products = [], cart = JSON.parse(localStorage.getItem('cart')) || [], user = JSON.parse(localStorage.getItem('user'));
+
         function init() {
-            const distSelect = document.getElementById('c_district');
-            if(distSelect) Object.keys(bdLocations).sort().forEach(d => { let o
+            // Try loading from Firebase
+            db.collection("products").onSnapshot(snapshot => {
+                products = [];
+                if(snapshot.empty) { products = defaults; } // Use defaults if empty
+                else { snapshot.forEach(doc => products.push({ id: doc.id, ...doc.data() })); }
+                render();
+            }, error => {
+                console.log("Using default products due to error:", error);
+                products = defaults; // Fallback to defaults
+                render();
+            });
+
+            if(user) listenNotifications();
+            updateNav();
+        }
+
+        function render() {
+            document.getElementById('product-grid').innerHTML = products.map(p => `
+                <div class="card">
+                    <img src="${p.img}" onerror="this.src='https://via.placeholder.com/300'">
+                    <div class="card-body">
+                        <div style="font-weight:bold;">${p.name}</div>
+                        <span class="card-price">${p.price} BDT</span>
+                        <div class="btn-group">
+                            <button class="btn btn-cart" onclick="addToCart('${p.id}')">Add Cart</button>
+                            <button class="btn btn-buy" onclick="buyNow('${p.id}')">Buy Now</button>
+                        </div>
+                    </div>
+                </div>`).join('');
+            document.getElementById('cart-count').innerText = cart.length;
+        }
+
+        // --- NOTIFICATIONS ---
+        function listenNotifications() {
+            db.collection("notifications").where("userEmail", "==", user.email).orderBy("timestamp", "desc")
+            .onSnapshot(snap => {
+                let html = "", count = 0;
+                if(snap.empty) html = '<p style="padding:15px; text-align:center;">No new notifications</p>';
+                else {
+                    snap.forEach(doc => {
+                        const n = doc.data();
+                        if(!n.read) count++;
+                        html += `<div class="noti-item ${n.read?'':'unread'}" onclick="markRead('${doc.id}')">
+                            <strong>${n.title}</strong><br>${n.message}
+                        </div>`;
+                    });
+                }
+                document.getElementById('noti-list').innerHTML = html;
+                const badge = document.getElementById('noti-count');
+                badge.innerText = count;
+                badge.style.display = count > 0 ? 'block' : 'none';
+            });
+        }
+        function markRead(id) { db.collection("notifications").doc(id).update({ read: true }); }
+        function toggleNotification() { 
+            const el = document.getElementById('noti-dropdown');
+            el.style.display = el.style.display==='block'?'none':'block'; 
+        }
+
+        // --- ORDER ---
+        function order() {
+            if(!user) { closeCheckoutModal(); openAuthModal(); return; }
+            const n=document.getElementById('c_name').value, p=document.getElementById('c_phone').value, a=document.getElementById('c_addr').value;
+            if(!n || !p || !a) return alert("Fill all info");
+
+            let items = cart.map(i => i.name).join(", ");
+            let total = cart.reduce((sum, i) => sum + i.price, 0);
+
+            db.collection("orders").add({
+                userEmail: user.email, userName: n, phone: p, items: items, total: total, address: a, status: 'Pending', timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                // Send Notification to User
+                db.collection("notifications").add({
+                    userEmail: user.email, title: "Order Placed", message: "Your order is pending confirmation.", read: false, timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                cart = []; localStorage.setItem('cart', JSON.stringify(cart)); render(); closeCheckoutModal();
+                alert("Order Placed Successfully!");
+            });
+        }
+
+        // --- AUTH & CART HELPERS ---
+        function updateNav() {
+            if(user) {
+                document.getElementById('authBtn').innerText = user.name;
+                if(user.role === 'admin') document.getElementById('userDropdown').innerHTML += `<a href="admin.html" style="color:blue;">⚙️ Admin Panel</a>`;
+            }
+        }
+        function handleAuthBtn() { if(user) document.getElementById('userDropdown').classList.toggle('show'); else openAuthModal(); }
+        function logout() { localStorage.removeItem('user'); window.location.reload(); }
+        
+        function googleLogin() {
+            auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(res => {
+                user = { name: res.user.displayName, email: res.user.
