@@ -6,7 +6,13 @@
     <title>Khan Enterprize | Online Shop</title>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;600&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #2563eb; --secondary: #1e293b; --bg: #f8fafc; --white: #ffffff; }
+        :root { 
+            --primary: #2563eb; 
+            --secondary: #1e293b; 
+            --accent: #f59e0b; /* Yellow for Buy Now */
+            --bg: #f8fafc; 
+            --white: #ffffff; 
+        }
         body { font-family: 'Poppins', sans-serif; margin: 0; background: var(--bg); color: #333; }
         
         nav { background: var(--white); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; }
@@ -17,7 +23,12 @@
         .cart-btn { background: var(--secondary); color: white; position: relative; }
         .badge { background: red; color: white; font-size: 10px; padding: 2px 6px; border-radius: 50%; position: absolute; top: -8px; right: -8px; }
 
-        /* Dropdown & Notification */
+        /* Notification & Dropdown */
+        .noti-btn { font-size: 22px; cursor: pointer; position: relative; }
+        .noti-badge { background: red; color: white; font-size: 10px; padding: 2px 5px; border-radius: 50%; position: absolute; top: -2px; right: -5px; display: none; }
+        .noti-dropdown { display: none; position: absolute; top: 60px; right: 5%; background: white; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border-radius: 8px; z-index: 2000; max-height: 400px; overflow-y: auto; }
+        .noti-item { padding: 12px; border-bottom: 1px solid #eee; font-size: 13px; cursor: pointer; background: #fff; }
+        
         .dropdown { position: relative; display: inline-block; }
         .login-btn { background: transparent; border: 1px solid var(--secondary); min-width: 90px; }
         .dropdown-content { display: none; position: absolute; right: 0; background: white; min-width: 160px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); z-index: 1001; border-radius: 8px; overflow: hidden; margin-top: 5px; }
@@ -33,20 +44,22 @@
         .card img { width: 100%; height: 220px; object-fit: cover; }
         .card-body { padding: 15px; text-align: center; }
         .card-price { color: var(--primary); font-size: 18px; font-weight: bold; margin: 5px 0; display: block; }
+        
+        /* BUTTONS */
         .btn-group { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
-        .btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; color: white; font-weight: 600; font-size: 12px; }
-        .btn-cart { background: var(--secondary); } .btn-buy { background: var(--accent); color: black; }
+        .btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 12px; }
+        .btn-cart { background: var(--secondary); color: white; } 
+        .btn-buy { background: var(--accent); color: black; } 
 
         /* Modals */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
         .modal-content { background: white; width: 95%; max-width: 500px; padding: 25px; border-radius: 12px; position: relative; max-height: 90vh; overflow-y: auto; }
         .close { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; }
         
-        /* Inputs & Layout */
+        /* Inputs */
         input, textarea, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         .label-text { font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 4px; display: block; }
         .checkout-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        
         .row-3 { display: flex; gap: 10px; }
         @media (max-width: 500px) { .row-3 { flex-direction: column; gap: 0; } }
     </style>
@@ -98,8 +111,8 @@
     <div class="modal" id="cart-modal">
         <div class="modal-content">
             <span class="close" onclick="closeCheckoutModal()">&times;</span>
-            <h3>Checkout</h3>
-            <div id="cart-items" style="max-height:100px; overflow-y:auto; margin-bottom:10px; border-bottom:1px solid #eee;"></div>
+            <h3 id="checkout-title">Checkout</h3>
+            <div id="cart-items" style="max-height:150px; overflow-y:auto; margin-bottom:10px; border-bottom:1px solid #eee;"></div>
             <h4 style="text-align:right; margin-bottom:15px;">Total: <span id="total">0</span> BDT</h4>
             
             <div style="background:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0;">
@@ -140,46 +153,70 @@
     </div>
 
     <script>
-        // --- 3-LAYER GEO DATA (Division -> District -> Upazila) ---
+        // --- GEO DATA ---
         const geoData = {
             "Dhaka": {
-                "Dhaka": ["Savar", "Dhamrai", "Keraniganj", "Nawabganj", "Dohar", "Mirpur", "Gulshan", "Uttara"],
-                "Gazipur": ["Gazipur Sadar", "Kaliakair", "Kapasia", "Sreepur"],
-                "Narayanganj": ["Narayanganj Sadar", "Rupganj", "Sonargaon"],
-                "Tangail": ["Tangail Sadar", "Mirzapur", "Madhupur"]
+                "Dhaka": ["Savar", "Dhamrai", "Keraniganj", "Nawabganj", "Dohar", "Mirpur", "Gulshan", "Uttara", "Mohammadpur", "Dhanmondi"],
+                "Gazipur": ["Gazipur Sadar", "Kaliakair", "Kapasia", "Sreepur", "Kaliganj"],
+                "Narayanganj": ["Narayanganj Sadar", "Rupganj", "Sonargaon", "Araihazar", "Bandar"],
+                "Tangail": ["Tangail Sadar", "Mirzapur", "Madhupur", "Gopalpur", "Kalihati"],
+                "Faridpur": ["Faridpur Sadar", "Boalmari", "Alfadanga", "Madhukhali", "Bhanga"],
+                "Narsingdi": ["Narsingdi Sadar", "Belabo", "Monohardi", "Palash", "Raipura", "Shibpur"],
+                "Manikganj": ["Manikganj Sadar", "Singair", "Shibalaya", "Saturia"],
+                "Munshiganj": ["Munshiganj Sadar", "Sreenagar", "Sirajdikhan", "Lohajang", "Gazaria", "Tongibari"],
+                "Kishoreganj": ["Kishoreganj Sadar", "Bhairab", "Bajitpur", "Kuliarchar", "Hossainpur"]
             },
             "Chattogram": {
-                "Chattogram": ["Patiya", "Hathazari", "Sitakunda", "Mirsharai", "Raozan"],
-                "Cox's Bazar": ["Cox's Bazar Sadar", "Ramu", "Teknaf"],
-                "Cumilla": ["Cumilla Sadar", "Daudkandi", "Laksam"],
-                "Feni": ["Feni Sadar", "Daganbhuiyan"]
+                "Chattogram": ["Chattogram Sadar", "Patiya", "Hathazari", "Sitakunda", "Mirsharai", "Raozan", "Rangunia", "Fatikchhari", "Anwara", "Boalkhali"],
+                "Cox's Bazar": ["Cox's Bazar Sadar", "Ramu", "Teknaf", "Ukhia", "Chakaria", "Maheshkhali"],
+                "Cumilla": ["Cumilla Sadar", "Daudkandi", "Laksam", "Muradnagar", "Debidwar", "Chandina"],
+                "Feni": ["Feni Sadar", "Daganbhuiyan", "Chhagalnaiya", "Parshuram", "Fulgazi", "Sonagazi"],
+                "Noakhali": ["Noakhali Sadar", "Begumganj", "Chatkhil", "Companiganj", "Hatiya", "Senbagh"],
+                "Brahmanbaria": ["Brahmanbaria Sadar", "Ashuganj", "Nasirnagar", "Nabinagar", "Bancharampur"],
+                "Lakshmipur": ["Lakshmipur Sadar", "Raipur", "Ramganj", "Ramgati"],
+                "Chandpur": ["Chandpur Sadar", "Hajiganj", "Matlab North", "Matlab South", "Faridganj"]
             },
             "Sylhet": {
-                "Sylhet": ["Sylhet Sadar", "Beanibazar", "Golapganj"],
-                "Moulvibazar": ["Moulvibazar Sadar", "Sreemangal"],
-                "Habiganj": ["Habiganj Sadar", "Chunarughat"]
+                "Sylhet": ["Sylhet Sadar", "Beanibazar", "Golapganj", "Bishwanath", "Osmani Nagar", "Fenchuganj", "Balaganj"],
+                "Moulvibazar": ["Moulvibazar Sadar", "Sreemangal", "Kulaura", "Barlekha", "Kamalganj"],
+                "Habiganj": ["Habiganj Sadar", "Chunarughat", "Madhabpur", "Nabiganj", "Bahubal"],
+                "Sunamganj": ["Sunamganj Sadar", "Chhatak", "Jagannathpur", "Derai", "Tahirpur"]
             },
             "Rajshahi": {
-                "Rajshahi": ["Rajshahi Sadar", "Paba", "Bagha"],
-                "Bogura": ["Bogura Sadar", "Sherpur"],
-                "Pabna": ["Pabna Sadar", "Ishwardi"]
+                "Rajshahi": ["Rajshahi Sadar", "Paba", "Bagha", "Charghat", "Durgapur", "Godagari", "Mohanpur", "Tanore"],
+                "Bogura": ["Bogura Sadar", "Sherpur", "Shibganj", "Gabtali", "Dupchanchia"],
+                "Pabna": ["Pabna Sadar", "Ishwardi", "Sujanagar", "Atgharia"],
+                "Sirajganj": ["Sirajganj Sadar", "Shahjadpur", "Ullapara", "Kazipur"],
+                "Naogaon": ["Naogaon Sadar", "Mohadevpur", "Manda", "Niamatpur"],
+                "Natore": ["Natore Sadar", "Singra", "Baraigram", "Lalpur"],
+                "Chapai Nawabganj": ["Chapai Nawabganj Sadar", "Shibganj", "Gomastapur"]
             },
             "Khulna": {
-                "Khulna": ["Khulna Sadar", "Dumuria", "Rupsha"],
-                "Jessore": ["Jessore Sadar", "Benapole"],
-                "Satkhira": ["Satkhira Sadar", "Kalaroa"]
+                "Khulna": ["Khulna Sadar", "Dumuria", "Dighalia", "Rupsha", "Phultala", "Batiaghata"],
+                "Jessore": ["Jessore Sadar", "Benapole", "Jhikargachha", "Abhaynagar", "Manirampur"],
+                "Satkhira": ["Satkhira Sadar", "Kalaroa", "Tala", "Shyamnagar", "Assasuni"],
+                "Kushtia": ["Kushtia Sadar", "Kumarkhali", "Bheramara", "Mirpur"],
+                "Jhenaidah": ["Jhenaidah Sadar", "Shailkupa", "Kaliganj"],
+                "Bagerhat": ["Bagerhat Sadar", "Mongla", "Morrelganj", "Rampal"]
             },
             "Barishal": {
-                "Barishal": ["Barishal Sadar", "Bakerganj"],
-                "Bhola": ["Bhola Sadar", "Char Fasson"]
+                "Barishal": ["Barishal Sadar", "Bakerganj", "Babuganj", "Wazirpur", "Banaripara", "Gournadi"],
+                "Bhola": ["Bhola Sadar", "Char Fasson", "Daulatkhan", "Borhanuddin"],
+                "Patuakhali": ["Patuakhali Sadar", "Bauphal", "Galachipa", "Kalapara"],
+                "Pirojpur": ["Pirojpur Sadar", "Nazirpur", "Kaukhali", "Bhandaria"]
             },
             "Rangpur": {
-                "Rangpur": ["Rangpur Sadar", "Mithapukur"],
-                "Dinajpur": ["Dinajpur Sadar", "Birganj"]
+                "Rangpur": ["Rangpur Sadar", "Mithapukur", "Pirganj", "Kaunia", "Badarganj"],
+                "Dinajpur": ["Dinajpur Sadar", "Birganj", "Birampur", "Parbatipur", "Phulbari"],
+                "Gaibandha": ["Gaibandha Sadar", "Gobindaganj", "Palashbari", "Sadullapur"],
+                "Kurigram": ["Kurigram Sadar", "Nageshwari", "Bhurungamari", "Ulipur"],
+                "Nilphamari": ["Nilphamari Sadar", "Saidpur", "Domar", "Jaldhaka"]
             },
             "Mymensingh": {
-                "Mymensingh": ["Mymensingh Sadar", "Muktagachha", "Valuka"],
-                "Jamalpur": ["Jamalpur Sadar", "Sarishabari"]
+                "Mymensingh": ["Mymensingh Sadar", "Muktagachha", "Valuka", "Trishal", "Gaffargaon", "Bhaluka", "Fulbaria"],
+                "Jamalpur": ["Jamalpur Sadar", "Sarishabari", "Melandaha", "Islampur"],
+                "Sherpur": ["Sherpur Sadar", "Nalitabari", "Nakla", "Jhenaigati"],
+                "Netrokona": ["Netrokona Sadar", "Kendua", "Mohanganj", "Durgapur"]
             }
         };
 
@@ -190,10 +227,14 @@
             { id: 4, name: "Running Sneakers", price: 2100, img: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=600" }
         ];
 
+        // --- GLOBAL VARIABLES ---
         let products = JSON.parse(localStorage.getItem('products'));
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
         let user = JSON.parse(localStorage.getItem('user'));
-        let isDirectBuy = false, directItem = null;
+        
+        // ** CRITICAL: SEPARATE VARIABLES FOR BUY NOW vs CART **
+        let purchaseMode = 'cart'; // 'cart' or 'buy_now'
+        let buyNowItem = null; 
 
         function init() {
             if (!products || products.length === 0) {
@@ -212,15 +253,155 @@
             });
         }
 
-        // --- LOCATION LOGIC (3 LAYERS) ---
+        // --- RENDER ---
+        function render() {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = products.map(p => `
+                <div class="card">
+                    <img src="${p.img}" onerror="this.src='https://via.placeholder.com/300'">
+                    <div class="card-body">
+                        <div>${p.name}</div>
+                        <span class="card-price">${p.price} BDT</span>
+                        <div class="btn-group">
+                            <button class="btn btn-cart" onclick="addToCart(${p.id})">Add to Cart</button>
+                            <button class="btn btn-buy" onclick="buyNow(${p.id})">Buy Now</button>
+                        </div>
+                    </div>
+                </div>`).join('');
+            document.getElementById('cart-count').innerText = cart.length;
+        }
+
+        // --- ADD TO CART (Doesn't open modal) ---
+        function addToCart(id) {
+            cart.push(products.find(x => x.id === id));
+            localStorage.setItem('cart', JSON.stringify(cart));
+            render();
+            alert("Added to Cart!");
+        }
+
+        // --- BUY NOW (Opens modal immediately, doesn't touch cart) ---
+        function buyNow(id) {
+            purchaseMode = 'buy_now';
+            buyNowItem = products.find(x => x.id === id);
+            openCheckoutModal();
+        }
+
+        // --- OPEN CART (Process Cart items) ---
+        function openCartModal() {
+            if (cart.length === 0) return alert("Cart is empty");
+            purchaseMode = 'cart';
+            buyNowItem = null;
+            openCheckoutModal();
+        }
+
+        // --- MODAL LOGIC ---
+        function openCheckoutModal() {
+            document.getElementById('cart-modal').style.display = 'flex';
+            
+            // Determine Title
+            document.getElementById('checkout-title').innerText = purchaseMode === 'buy_now' ? "Buy Now" : "Checkout Cart";
+            
+            updateCheckoutDisplay();
+
+            // Pre-fill user data
+            if (user) {
+                document.getElementById('c_name').value = user.name || '';
+                document.getElementById('c_phone').value = user.phone || '';
+                document.getElementById('c_email').value = user.email || '';
+            }
+        }
+
+        function updateCheckoutDisplay() {
+            const list = document.getElementById('cart-items');
+            let total = 0;
+            let itemsToDisplay = [];
+
+            if (purchaseMode === 'buy_now') {
+                itemsToDisplay = [buyNowItem];
+            } else {
+                itemsToDisplay = cart;
+            }
+
+            list.innerHTML = itemsToDisplay.map((i, idx) => {
+                total += i.price;
+                // Only show delete button if it's CART mode
+                const delBtn = purchaseMode === 'cart' ? `<b style="color:red; cursor:pointer; margin-left:10px;" onclick="removeFromCart(${idx})">✖</b>` : '';
+                
+                return `<div style="display:flex; justify-content:space-between; margin-bottom:5px; border-bottom:1px solid #f1f1f1; padding:5px;">
+                    <span>${i.name}</span>
+                    <span>${i.price} BDT ${delBtn}</span>
+                </div>`;
+            }).join('');
+
+            document.getElementById('total').innerText = total;
+        }
+
+        function removeFromCart(index) {
+            if(purchaseMode === 'cart') {
+                cart.splice(index, 1);
+                localStorage.setItem('cart', JSON.stringify(cart));
+                render();
+                updateCheckoutDisplay();
+                if(cart.length === 0) closeCheckoutModal();
+            }
+        }
+
+        // --- ORDER FUNCTION ---
+        function order() {
+            if(!user) { closeCheckoutModal(); openAuthModal(); return; }
+            
+            const n = document.getElementById('c_name').value;
+            const p = document.getElementById('c_phone').value;
+            const e = document.getElementById('c_email').value;
+            const div = document.getElementById('c_division').value;
+            const dist = document.getElementById('c_district').value;
+            const upa = document.getElementById('c_upazila').value;
+            const addr = document.getElementById('c_addr').value;
+            const method = document.getElementById('c_method').value;
+
+            if(!n || !p || !e || !div || !dist || !upa || !addr) return alert("Please fill ALL address fields properly.");
+
+            // Decide which items to order
+            const itemsToOrder = purchaseMode === 'buy_now' ? [buyNowItem] : cart;
+            
+            let itemStr = itemsToOrder.map(i=>i.name).join(", ");
+            let total = itemsToOrder.reduce((s,i)=>s+i.price, 0);
+            const fullAddress = `${addr}, ${upa}, ${dist}, ${div}`;
+
+            let orders = JSON.parse(localStorage.getItem('orders')) || [];
+            const newOrder = {
+                id: Date.now(),
+                userEmail: user.email, userName: n, phone: p,
+                items: itemStr, total: total, 
+                address: fullAddress, method: method,
+                status: 'Pending', time: new Date().toLocaleString()
+            };
+            
+            orders.unshift(newOrder);
+            localStorage.setItem('orders', JSON.stringify(orders));
+
+            const waMsg = `New Order #${newOrder.id}\nName: ${n}\nPhone: ${p}\nAddr: ${fullAddress}\nItems: ${itemStr}\nTotal: ${total}`;
+            window.open(`https://wa.me/8801700000000?text=${encodeURIComponent(waMsg)}`);
+
+            // Only clear cart if ordered from cart
+            if (purchaseMode === 'cart') {
+                cart = [];
+                localStorage.setItem('cart', JSON.stringify(cart));
+                render();
+            }
+
+            closeCheckoutModal(); 
+            alert("Order Placed Successfully!");
+        }
+
+        // --- LOCATION LOGIC ---
         function loadDistricts() {
             const division = document.getElementById('c_division').value;
             const distSelect = document.getElementById('c_district');
             const upaSelect = document.getElementById('c_upazila');
             
-            // Reset
-            distSelect.innerHTML = '<option value="">Select District</option>';
-            upaSelect.innerHTML = '<option value="">Select Upazila</option>';
+            distSelect.innerHTML = '<option value="">Select District (জেলা)</option>';
+            upaSelect.innerHTML = '<option value="">Select Upazila (উপজেলা)</option>';
             upaSelect.disabled = true;
 
             if(division && geoData[division]) {
@@ -240,7 +421,7 @@
             const district = document.getElementById('c_district').value;
             const upaSelect = document.getElementById('c_upazila');
 
-            upaSelect.innerHTML = '<option value="">Select Upazila</option>';
+            upaSelect.innerHTML = '<option value="">Select Upazila (উপজেলা)</option>';
 
             if(division && district && geoData[division][district]) {
                 upaSelect.disabled = false;
@@ -252,71 +433,6 @@
             } else {
                 upaSelect.disabled = true;
             }
-        }
-
-        // --- RENDER & ORDER ---
-        function render() {
-            const grid = document.getElementById('product-grid');
-            if(products.length === 0) {
-                grid.innerHTML = '<p style="text-align:center;">No products available. Click "Refresh Products".</p>';
-            } else {
-                grid.innerHTML = products.map(p => `
-                    <div class="card">
-                        <img src="${p.img}" onerror="this.src='https://via.placeholder.com/300'">
-                        <div class="card-body">
-                            <div>${p.name}</div>
-                            <span class="card-price">${p.price} BDT</span>
-                            <div class="btn-group">
-                                <button class="btn btn-cart" onclick="addToCart(${p.id})">Add Cart</button>
-                                <button class="btn btn-buy" onclick="buyNow(${p.id})">Buy Now</button>
-                            </div>
-                        </div>
-                    </div>`).join('');
-            }
-            document.getElementById('cart-count').innerText = cart.length;
-        }
-
-        function order() {
-            if(!user) { closeCheckoutModal(); openAuthModal(); return; }
-            
-            const n = document.getElementById('c_name').value;
-            const p = document.getElementById('c_phone').value;
-            const e = document.getElementById('c_email').value;
-            
-            const div = document.getElementById('c_division').value;
-            const dist = document.getElementById('c_district').value;
-            const upa = document.getElementById('c_upazila').value;
-            const addr = document.getElementById('c_addr').value;
-            const method = document.getElementById('c_method').value;
-
-            if(!n || !p || !e || !div || !dist || !upa || !addr) return alert("Please fill ALL address fields properly.");
-
-            const items = isDirectBuy ? [directItem] : cart;
-            let itemStr = items.map(i=>i.name).join(", ");
-            let total = items.reduce((s,i)=>s+i.price, 0);
-            
-            // Format Full Address
-            const fullAddress = `${addr}, ${upa}, ${dist}, ${div}`;
-
-            let orders = JSON.parse(localStorage.getItem('orders')) || [];
-            const newOrder = {
-                id: Date.now(),
-                userEmail: user.email, userName: n, phone: p,
-                items: itemStr, total: total, 
-                address: fullAddress, 
-                method: method,
-                status: 'Pending',
-                time: new Date().toLocaleString()
-            };
-            
-            orders.unshift(newOrder);
-            localStorage.setItem('orders', JSON.stringify(orders));
-
-            const waMsg = `New Order #${newOrder.id}\nName: ${n}\nPhone: ${p}\nAddr: ${fullAddress}\nItems: ${itemStr}\nTotal: ${total}`;
-            window.open(`https://wa.me/8801700000000?text=${encodeURIComponent(waMsg)}`);
-
-            if(!isDirectBuy) { cart=[]; localStorage.setItem('cart', JSON.stringify(cart)); render(); }
-            closeCheckoutModal(); alert("Order Placed Successfully!");
         }
 
         // --- HELPERS ---
@@ -337,26 +453,6 @@
         }
         function logout() { localStorage.removeItem('user'); location.reload(); }
         function hardReset() { localStorage.setItem('products', JSON.stringify(defaults)); location.reload(); }
-
-        function addToCart(id) { cart.push(products.find(x=>x.id===id)); localStorage.setItem('cart', JSON.stringify(cart)); render(); }
-        function buyNow(id) { directItem=products.find(x=>x.id===id); isDirectBuy=true; openCheckoutModal(); }
-        function openCartModal() { isDirectBuy=false; if(cart.length) openCheckoutModal(); else alert("Cart empty"); }
-        
-        function openCheckoutModal() { 
-            document.getElementById('cart-modal').style.display='flex';
-            updateCheckout(); 
-            if(user) {
-                document.getElementById('c_name').value = user.name || '';
-                document.getElementById('c_phone').value = user.phone || '';
-                document.getElementById('c_email').value = user.email || '';
-            }
-        }
-        function updateCheckout() {
-            const items = isDirectBuy ? [directItem] : cart;
-            let t = 0;
-            document.getElementById('cart-items').innerHTML = items.map(i=>{t+=i.price; return `<div>${i.name} - ${i.price}</div>`}).join('');
-            document.getElementById('total').innerText=t;
-        }
         function closeCheckoutModal() { document.getElementById('cart-modal').style.display='none'; }
         function openAuthModal() { document.getElementById('auth-modal').style.display='flex'; }
         function closeAuth() { document.getElementById('auth-modal').style.display='none'; }
