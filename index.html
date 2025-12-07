@@ -9,7 +9,7 @@
         :root { 
             --primary: #2563eb; 
             --secondary: #1e293b; 
-            --accent: #f59e0b; /* Yellow for Buy Now */
+            --accent: #f59e0b; 
             --bg: #f8fafc; 
             --white: #ffffff; 
         }
@@ -23,40 +23,31 @@
         .cart-btn { background: var(--secondary); color: white; position: relative; }
         .badge { background: red; color: white; font-size: 10px; padding: 2px 6px; border-radius: 50%; position: absolute; top: -8px; right: -8px; }
 
-        /* Notification & Dropdown */
-        .noti-btn { font-size: 22px; cursor: pointer; position: relative; }
-        .noti-badge { background: red; color: white; font-size: 10px; padding: 2px 5px; border-radius: 50%; position: absolute; top: -2px; right: -5px; display: none; }
-        .noti-dropdown { display: none; position: absolute; top: 60px; right: 5%; background: white; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border-radius: 8px; z-index: 2000; max-height: 400px; overflow-y: auto; }
-        .noti-item { padding: 12px; border-bottom: 1px solid #eee; font-size: 13px; cursor: pointer; background: #fff; }
-        
         .dropdown { position: relative; display: inline-block; }
         .login-btn { background: transparent; border: 1px solid var(--secondary); min-width: 90px; }
         .dropdown-content { display: none; position: absolute; right: 0; background: white; min-width: 160px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); z-index: 1001; border-radius: 8px; overflow: hidden; margin-top: 5px; }
         .dropdown-content a { padding: 12px; display: block; color: black; text-decoration: none; font-size: 14px; border-bottom: 1px solid #f1f1f1; }
         .show { display: block; }
 
-        /* Hero & Grid */
         .hero { background: linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1472851294608-415522f96319?w=1200'); background-size: cover; color: white; text-align: center; padding: 80px 20px; border-radius: 0 0 40px 40px; margin-bottom: 40px; }
         .container { max-width: 1200px; margin: auto; padding: 0 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-bottom: 50px; }
+        
         .card { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.3s; }
         .card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .card img { width: 100%; height: 220px; object-fit: cover; }
         .card-body { padding: 15px; text-align: center; }
         .card-price { color: var(--primary); font-size: 18px; font-weight: bold; margin: 5px 0; display: block; }
         
-        /* BUTTONS */
         .btn-group { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
         .btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 12px; }
         .btn-cart { background: var(--secondary); color: white; } 
         .btn-buy { background: var(--accent); color: black; } 
 
-        /* Modals */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
         .modal-content { background: white; width: 95%; max-width: 500px; padding: 25px; border-radius: 12px; position: relative; max-height: 90vh; overflow-y: auto; }
         .close { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; }
         
-        /* Inputs */
         input, textarea, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         .label-text { font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 4px; display: block; }
         .checkout-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
@@ -70,7 +61,6 @@
         <a href="index.html" class="logo">Khan Enterprize</a>
         <div class="nav-icons">
             <a href="contact.html" target="_blank" class="btn-common contact-btn">📞 Contact</a>
-            
             <div class="dropdown">
                 <button class="btn-common login-btn" onclick="handleAuthBtn()" id="authBtn">Login</button>
                 <div id="userDropdown" class="dropdown-content">
@@ -79,7 +69,6 @@
                     <a href="#" onclick="logout()" style="color:red;">🚪 Logout</a>
                 </div>
             </div>
-            
             <div class="btn-common cart-btn" onclick="openCartModal()">Cart <span class="badge" id="cart-count">0</span></div>
         </div>
     </nav>
@@ -111,8 +100,8 @@
     <div class="modal" id="cart-modal">
         <div class="modal-content">
             <span class="close" onclick="closeCheckoutModal()">&times;</span>
-            <h3 id="checkout-title">Checkout</h3>
-            <div id="cart-items" style="max-height:150px; overflow-y:auto; margin-bottom:10px; border-bottom:1px solid #eee;"></div>
+            <h3>Checkout</h3>
+            <div id="cart-items" style="max-height:100px; overflow-y:auto; margin-bottom:10px; border-bottom:1px solid #eee;"></div>
             <h4 style="text-align:right; margin-bottom:15px;">Total: <span id="total">0</span> BDT</h4>
             
             <div style="background:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0;">
@@ -153,70 +142,87 @@
     </div>
 
     <script>
-        // --- GEO DATA ---
+        // --- COMPLETE BANGLADESH GEO DATA (ALL 64 DISTRICTS) ---
         const geoData = {
             "Dhaka": {
-                "Dhaka": ["Savar", "Dhamrai", "Keraniganj", "Nawabganj", "Dohar", "Mirpur", "Gulshan", "Uttara", "Mohammadpur", "Dhanmondi"],
+                "Dhaka": ["Savar", "Dhamrai", "Keraniganj", "Nawabganj", "Dohar", "Mirpur", "Gulshan", "Uttara"],
                 "Gazipur": ["Gazipur Sadar", "Kaliakair", "Kapasia", "Sreepur", "Kaliganj"],
                 "Narayanganj": ["Narayanganj Sadar", "Rupganj", "Sonargaon", "Araihazar", "Bandar"],
-                "Tangail": ["Tangail Sadar", "Mirzapur", "Madhupur", "Gopalpur", "Kalihati"],
-                "Faridpur": ["Faridpur Sadar", "Boalmari", "Alfadanga", "Madhukhali", "Bhanga"],
-                "Narsingdi": ["Narsingdi Sadar", "Belabo", "Monohardi", "Palash", "Raipura", "Shibpur"],
-                "Manikganj": ["Manikganj Sadar", "Singair", "Shibalaya", "Saturia"],
                 "Munshiganj": ["Munshiganj Sadar", "Sreenagar", "Sirajdikhan", "Lohajang", "Gazaria", "Tongibari"],
-                "Kishoreganj": ["Kishoreganj Sadar", "Bhairab", "Bajitpur", "Kuliarchar", "Hossainpur"]
+                "Narsingdi": ["Narsingdi Sadar", "Belabo", "Monohardi", "Palash", "Raipura", "Shibpur"],
+                "Manikganj": ["Manikganj Sadar", "Singair", "Shibalaya", "Saturia", "Daulatpur", "Ghior", "Harirampur"],
+                "Tangail": ["Tangail Sadar", "Mirzapur", "Madhupur", "Gopalpur", "Kalihati", "Sakhipur", "Basail", "Delduar", "Ghatail"],
+                "Kishoreganj": ["Kishoreganj Sadar", "Bhairab", "Bajitpur", "Kuliarchar", "Hossainpur", "Itna", "Karimganj", "Katiadi"],
+                "Faridpur": ["Faridpur Sadar", "Boalmari", "Alfadanga", "Madhukhali", "Bhanga", "Nagarkanda", "Charbhadrasan", "Sadarpur"],
+                "Gopalganj": ["Gopalganj Sadar", "Kashiani", "Kotalipara", "Muksudpur", "Tungipara"],
+                "Madaripur": ["Madaripur Sadar", "Kalkini", "Rajoir", "Shibchar"],
+                "Rajbari": ["Rajbari Sadar", "Baliakandi", "Goalandaghat", "Pangsha", "Kalukhali"],
+                "Shariatpur": ["Shariatpur Sadar", "Bhedarganj", "Damudya", "Gosairhat", "Naria", "Zajira"]
             },
             "Chattogram": {
-                "Chattogram": ["Chattogram Sadar", "Patiya", "Hathazari", "Sitakunda", "Mirsharai", "Raozan", "Rangunia", "Fatikchhari", "Anwara", "Boalkhali"],
-                "Cox's Bazar": ["Cox's Bazar Sadar", "Ramu", "Teknaf", "Ukhia", "Chakaria", "Maheshkhali"],
-                "Cumilla": ["Cumilla Sadar", "Daudkandi", "Laksam", "Muradnagar", "Debidwar", "Chandina"],
-                "Feni": ["Feni Sadar", "Daganbhuiyan", "Chhagalnaiya", "Parshuram", "Fulgazi", "Sonagazi"],
-                "Noakhali": ["Noakhali Sadar", "Begumganj", "Chatkhil", "Companiganj", "Hatiya", "Senbagh"],
-                "Brahmanbaria": ["Brahmanbaria Sadar", "Ashuganj", "Nasirnagar", "Nabinagar", "Bancharampur"],
-                "Lakshmipur": ["Lakshmipur Sadar", "Raipur", "Ramganj", "Ramgati"],
-                "Chandpur": ["Chandpur Sadar", "Hajiganj", "Matlab North", "Matlab South", "Faridganj"]
-            },
-            "Sylhet": {
-                "Sylhet": ["Sylhet Sadar", "Beanibazar", "Golapganj", "Bishwanath", "Osmani Nagar", "Fenchuganj", "Balaganj"],
-                "Moulvibazar": ["Moulvibazar Sadar", "Sreemangal", "Kulaura", "Barlekha", "Kamalganj"],
-                "Habiganj": ["Habiganj Sadar", "Chunarughat", "Madhabpur", "Nabiganj", "Bahubal"],
-                "Sunamganj": ["Sunamganj Sadar", "Chhatak", "Jagannathpur", "Derai", "Tahirpur"]
+                "Chattogram": ["Chattogram Sadar", "Patiya", "Hathazari", "Sitakunda", "Mirsharai", "Raozan", "Rangunia", "Fatikchhari", "Anwara", "Boalkhali", "Karnaphuli", "Lohagara", "Satkania", "Sandwip", "Banshkhali"],
+                "Cox's Bazar": ["Cox's Bazar Sadar", "Chakaria", "Kutubdia", "Maheshkhali", "Pekua", "Ramu", "Teknaf", "Ukhia"],
+                "Cumilla": ["Cumilla Sadar", "Barura", "Brahmanpara", "Burichang", "Chandina", "Chauddagram", "Daudkandi", "Debidwar", "Homna", "Laksam", "Muradnagar", "Nangalkot", "Titas", "Meghna", "Monohargonj"],
+                "Brahmanbaria": ["Brahmanbaria Sadar", "Ashuganj", "Nasirnagar", "Nabinagar", "Bancharampur", "Kasba", "Akhaura", "Sarail"],
+                "Chandpur": ["Chandpur Sadar", "Faridganj", "Haimchar", "Hajiganj", "Kachua", "Matlab North", "Matlab South", "Shahrasti"],
+                "Lakshmipur": ["Lakshmipur Sadar", "Raipur", "Ramganj", "Ramgati", "Kamalnagar"],
+                "Noakhali": ["Noakhali Sadar", "Begumganj", "Chatkhil", "Companiganj", "Hatiya", "Senbagh", "Sonaimuri", "Subarnachar", "Kabirhat"],
+                "Feni": ["Feni Sadar", "Chhagalnaiya", "Daganbhuiyan", "Parshuram", "Fulgazi", "Sonagazi"],
+                "Khagrachhari": ["Khagrachhari Sadar", "Dighinala", "Lakshmichhari", "Mahalchhari", "Manikchhari", "Matiranga", "Panchhari", "Ramgarh"],
+                "Rangamati": ["Rangamati Sadar", "Bagaichhari", "Barkal", "Kawkhali", "Kaptai", "Juraichhari", "Langadu", "Naniarchar", "Rajasthali", "Belaichhari"],
+                "Bandarban": ["Bandarban Sadar", "Ali Kadam", "Lama", "Naikhongchhari", "Rowangchhari", "Ruma", "Thanchi"]
             },
             "Rajshahi": {
-                "Rajshahi": ["Rajshahi Sadar", "Paba", "Bagha", "Charghat", "Durgapur", "Godagari", "Mohanpur", "Tanore"],
-                "Bogura": ["Bogura Sadar", "Sherpur", "Shibganj", "Gabtali", "Dupchanchia"],
-                "Pabna": ["Pabna Sadar", "Ishwardi", "Sujanagar", "Atgharia"],
-                "Sirajganj": ["Sirajganj Sadar", "Shahjadpur", "Ullapara", "Kazipur"],
-                "Naogaon": ["Naogaon Sadar", "Mohadevpur", "Manda", "Niamatpur"],
-                "Natore": ["Natore Sadar", "Singra", "Baraigram", "Lalpur"],
-                "Chapai Nawabganj": ["Chapai Nawabganj Sadar", "Shibganj", "Gomastapur"]
+                "Rajshahi": ["Rajshahi Sadar", "Bagha", "Bagmara", "Charghat", "Durgapur", "Godagari", "Mohanpur", "Paba", "Puthia", "Tanore"],
+                "Sirajganj": ["Sirajganj Sadar", "Belkuchi", "Chauhali", "Kamarkhanda", "Kazipur", "Raiganj", "Shahjadpur", "Tarash", "Ullapara"],
+                "Pabna": ["Pabna Sadar", "Atgharia", "Bera", "Bhangura", "Chatmohar", "Faridpur", "Ishwardi", "Santhia", "Sujanagar"],
+                "Bogura": ["Bogura Sadar", "Adamdighi", "Dhunat", "Dhupchanchia", "Gabtali", "Kahaloo", "Nandigram", "Sariakandi", "Sherpur", "Shibganj", "Sonatala"],
+                "Naogaon": ["Naogaon Sadar", "Atrai", "Badalgachhi", "Dhamoirhat", "Manda", "Mohadevpur", "Niamatpur", "Patnitala", "Porsha", "Raninagar", "Sapahar"],
+                "Natore": ["Natore Sadar", "Bagatipara", "Baraigram", "Gurudaspur", "Lalpur", "Singra", "Naldanga"],
+                "Chapai Nawabganj": ["Chapai Nawabganj Sadar", "Bholahat", "Gomastapur", "Nachole", "Shibganj"],
+                "Joypurhat": ["Joypurhat Sadar", "Akkelpur", "Kalai", "Khetlal", "Panchbibi"]
             },
             "Khulna": {
-                "Khulna": ["Khulna Sadar", "Dumuria", "Dighalia", "Rupsha", "Phultala", "Batiaghata"],
-                "Jessore": ["Jessore Sadar", "Benapole", "Jhikargachha", "Abhaynagar", "Manirampur"],
-                "Satkhira": ["Satkhira Sadar", "Kalaroa", "Tala", "Shyamnagar", "Assasuni"],
-                "Kushtia": ["Kushtia Sadar", "Kumarkhali", "Bheramara", "Mirpur"],
-                "Jhenaidah": ["Jhenaidah Sadar", "Shailkupa", "Kaliganj"],
-                "Bagerhat": ["Bagerhat Sadar", "Mongla", "Morrelganj", "Rampal"]
+                "Khulna": ["Khulna Sadar", "Batiaghata", "Dacope", "Dumuria", "Dighalia", "Koyra", "Paikgachha", "Phultala", "Rupsha", "Terokhada"],
+                "Bagerhat": ["Bagerhat Sadar", "Chitalmari", "Fakirhat", "Kachua", "Mollahat", "Mongla", "Morrelganj", "Rampal", "Sarankhola"],
+                "Satkhira": ["Satkhira Sadar", "Assasuni", "Debhata", "Kalaroa", "Kaliganj", "Shyamnagar", "Tala"],
+                "Jashore": ["Jashore Sadar", "Abhaynagar", "Bagherpara", "Chaugachha", "Jhikargachha", "Keshabpur", "Manirampur", "Sharsha"],
+                "Magura": ["Magura Sadar", "Mohammadpur", "Shalikha", "Sreepur"],
+                "Jhenaidah": ["Jhenaidah Sadar", "Harinakunda", "Kaliganj", "Kotchandpur", "Maheshpur", "Shailkupa"],
+                "Narail": ["Narail Sadar", "Kalia", "Lohagara"],
+                "Kushtia": ["Kushtia Sadar", "Bheramara", "Daulatpur", "Khoksa", "Kumarkhali", "Mirpur"],
+                "Chuadanga": ["Chuadanga Sadar", "Alamdanga", "Damurhuda", "Jibannagar"],
+                "Meherpur": ["Meherpur Sadar", "Gangni", "Mujibnagar"]
             },
             "Barishal": {
-                "Barishal": ["Barishal Sadar", "Bakerganj", "Babuganj", "Wazirpur", "Banaripara", "Gournadi"],
-                "Bhola": ["Bhola Sadar", "Char Fasson", "Daulatkhan", "Borhanuddin"],
-                "Patuakhali": ["Patuakhali Sadar", "Bauphal", "Galachipa", "Kalapara"],
-                "Pirojpur": ["Pirojpur Sadar", "Nazirpur", "Kaukhali", "Bhandaria"]
+                "Barishal": ["Barishal Sadar", "Agailjhara", "Babuganj", "Bakerganj", "Banaripara", "Gaurnadi", "Hizla", "Mehendiganj", "Muladi", "Wazirpur"],
+                "Bhola": ["Bhola Sadar", "Burhanuddin", "Char Fasson", "Daulatkhan", "Lalmohan", "Manpura", "Tazumuddin"],
+                "Jhalokathi": ["Jhalokathi Sadar", "Kathalia", "Nalchity", "Rajapur"],
+                "Pirojpur": ["Pirojpur Sadar", "Bhandaria", "Kawkhali", "Mathbaria", "Nazirpur", "Nesarabad", "Indurkani"],
+                "Barguna": ["Barguna Sadar", "Amtali", "Bamna", "Betagi", "Patharghata", "Taltali"],
+                "Patuakhali": ["Patuakhali Sadar", "Bauphal", "Dashmina", "Galachipa", "Kalapara", "Mirzaganj", "Rangabali", "Dumki"]
+            },
+            "Sylhet": {
+                "Sylhet": ["Sylhet Sadar", "Balaganj", "Beanibazar", "Bishwanath", "Companiganj", "Fenchuganj", "Golapganj", "Gowainghat", "Jaintiapur", "Kanaighat", "Osmani Nagar", "Zakiganj"],
+                "Moulvibazar": ["Moulvibazar Sadar", "Barlekha", "Juri", "Kamalganj", "Kulaura", "Rajnagar", "Sreemangal"],
+                "Habiganj": ["Habiganj Sadar", "Ajmiriganj", "Bahubal", "Baniyachong", "Chunarughat", "Lakhai", "Madhabpur", "Nabiganj", "Shayestaganj"],
+                "Sunamganj": ["Sunamganj Sadar", "Bishwamvarpur", "Chhatak", "Derai", "Dharamapasha", "Dowarabazar", "Jagannathpur", "Jamalganj", "Shantiganj", "Sullah", "Tahirpur"]
             },
             "Rangpur": {
-                "Rangpur": ["Rangpur Sadar", "Mithapukur", "Pirganj", "Kaunia", "Badarganj"],
-                "Dinajpur": ["Dinajpur Sadar", "Birganj", "Birampur", "Parbatipur", "Phulbari"],
-                "Gaibandha": ["Gaibandha Sadar", "Gobindaganj", "Palashbari", "Sadullapur"],
-                "Kurigram": ["Kurigram Sadar", "Nageshwari", "Bhurungamari", "Ulipur"],
-                "Nilphamari": ["Nilphamari Sadar", "Saidpur", "Domar", "Jaldhaka"]
+                "Rangpur": ["Rangpur Sadar", "Badarganj", "Gangachara", "Kaunia", "Mithapukur", "Pirgachha", "Pirganj", "Taraganj"],
+                "Gaibandha": ["Gaibandha Sadar", "Phulchhari", "Gobindaganj", "Palashbari", "Sadullapur", "Saghata", "Sundarganj"],
+                "Nilphamari": ["Nilphamari Sadar", "Dimla", "Domar", "Jaldhaka", "Kishoreganj", "Saidpur"],
+                "Kurigram": ["Kurigram Sadar", "Bhurungamari", "Char Rajibpur", "Chilmari", "Nageshwari", "Phulbari", "Rajarhat", "Raomari", "Ulipur"],
+                "Lalmonirhat": ["Lalmonirhat Sadar", "Aditmari", "Hatibandha", "Kaliganj", "Patgram"],
+                "Dinajpur": ["Dinajpur Sadar", "Birampur", "Birganj", "Biral", "Bochaganj", "Chirirbandar", "Phulbari", "Ghoraghat", "Hakimpur", "Kaharole", "Khansama", "Nawabganj", "Parbatipur"],
+                "Thakurgaon": ["Thakurgaon Sadar", "Baliadangi", "Haripur", "Pirganj", "Ranishankail"],
+                "Panchagarh": ["Panchagarh Sadar", "Atwari", "Boda", "Debiganj", "Tetulia"]
             },
             "Mymensingh": {
-                "Mymensingh": ["Mymensingh Sadar", "Muktagachha", "Valuka", "Trishal", "Gaffargaon", "Bhaluka", "Fulbaria"],
-                "Jamalpur": ["Jamalpur Sadar", "Sarishabari", "Melandaha", "Islampur"],
-                "Sherpur": ["Sherpur Sadar", "Nalitabari", "Nakla", "Jhenaigati"],
-                "Netrokona": ["Netrokona Sadar", "Kendua", "Mohanganj", "Durgapur"]
+                "Mymensingh": ["Mymensingh Sadar", "Bhaluka", "Dhobaura", "Fulbaria", "Gaffargaon", "Gauripur", "Haluaghat", "Ishwarganj", "Muktagachha", "Nandail", "Phulpur", "Tara Khanda", "Trishal"],
+                "Jamalpur": ["Jamalpur Sadar", "Bakshiganj", "Dewanganj", "Islampur", "Madarganj", "Melandaha", "Sarishabari"],
+                "Netrokona": ["Netrokona Sadar", "Atpara", "Barhatta", "Durgapur", "Khaliajuri", "Kalmakanda", "Kendua", "Madan", "Mohanganj", "Purbadhala"],
+                "Sherpur": ["Sherpur Sadar", "Jhenaigati", "Nakla", "Nalitabari", "Sreebardi"]
             }
         };
 
@@ -232,8 +238,8 @@
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
         let user = JSON.parse(localStorage.getItem('user'));
         
-        // ** CRITICAL: SEPARATE VARIABLES FOR BUY NOW vs CART **
-        let purchaseMode = 'cart'; // 'cart' or 'buy_now'
+        // ** SEPARATE VARIABLES **
+        let purchaseMode = 'cart'; 
         let buyNowItem = null; 
 
         function init() {
@@ -271,7 +277,7 @@
             document.getElementById('cart-count').innerText = cart.length;
         }
 
-        // --- ADD TO CART (Doesn't open modal) ---
+        // --- ADD TO CART ---
         function addToCart(id) {
             cart.push(products.find(x => x.id === id));
             localStorage.setItem('cart', JSON.stringify(cart));
@@ -279,14 +285,14 @@
             alert("Added to Cart!");
         }
 
-        // --- BUY NOW (Opens modal immediately, doesn't touch cart) ---
+        // --- BUY NOW ---
         function buyNow(id) {
             purchaseMode = 'buy_now';
             buyNowItem = products.find(x => x.id === id);
             openCheckoutModal();
         }
 
-        // --- OPEN CART (Process Cart items) ---
+        // --- OPEN CART ---
         function openCartModal() {
             if (cart.length === 0) return alert("Cart is empty");
             purchaseMode = 'cart';
@@ -297,13 +303,8 @@
         // --- MODAL LOGIC ---
         function openCheckoutModal() {
             document.getElementById('cart-modal').style.display = 'flex';
-            
-            // Determine Title
             document.getElementById('checkout-title').innerText = purchaseMode === 'buy_now' ? "Buy Now" : "Checkout Cart";
-            
             updateCheckoutDisplay();
-
-            // Pre-fill user data
             if (user) {
                 document.getElementById('c_name').value = user.name || '';
                 document.getElementById('c_phone').value = user.phone || '';
@@ -314,19 +315,11 @@
         function updateCheckoutDisplay() {
             const list = document.getElementById('cart-items');
             let total = 0;
-            let itemsToDisplay = [];
-
-            if (purchaseMode === 'buy_now') {
-                itemsToDisplay = [buyNowItem];
-            } else {
-                itemsToDisplay = cart;
-            }
+            let itemsToDisplay = purchaseMode === 'buy_now' ? [buyNowItem] : cart;
 
             list.innerHTML = itemsToDisplay.map((i, idx) => {
                 total += i.price;
-                // Only show delete button if it's CART mode
                 const delBtn = purchaseMode === 'cart' ? `<b style="color:red; cursor:pointer; margin-left:10px;" onclick="removeFromCart(${idx})">✖</b>` : '';
-                
                 return `<div style="display:flex; justify-content:space-between; margin-bottom:5px; border-bottom:1px solid #f1f1f1; padding:5px;">
                     <span>${i.name}</span>
                     <span>${i.price} BDT ${delBtn}</span>
@@ -361,7 +354,6 @@
 
             if(!n || !p || !e || !div || !dist || !upa || !addr) return alert("Please fill ALL address fields properly.");
 
-            // Decide which items to order
             const itemsToOrder = purchaseMode === 'buy_now' ? [buyNowItem] : cart;
             
             let itemStr = itemsToOrder.map(i=>i.name).join(", ");
@@ -383,7 +375,6 @@
             const waMsg = `New Order #${newOrder.id}\nName: ${n}\nPhone: ${p}\nAddr: ${fullAddress}\nItems: ${itemStr}\nTotal: ${total}`;
             window.open(`https://wa.me/8801700000000?text=${encodeURIComponent(waMsg)}`);
 
-            // Only clear cart if ordered from cart
             if (purchaseMode === 'cart') {
                 cart = [];
                 localStorage.setItem('cart', JSON.stringify(cart));
