@@ -17,20 +17,16 @@
         .cart-btn { background: var(--secondary); color: white; position: relative; }
         .badge { background: red; color: white; font-size: 10px; padding: 2px 6px; border-radius: 50%; position: absolute; top: -8px; right: -8px; }
 
-        /* Notification */
+        /* Notification & Dropdown Styles */
         .noti-btn { font-size: 22px; cursor: pointer; position: relative; }
         .noti-badge { background: red; color: white; font-size: 10px; padding: 2px 5px; border-radius: 50%; position: absolute; top: -2px; right: -5px; display: none; }
         .noti-dropdown { display: none; position: absolute; top: 60px; right: 5%; background: white; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border-radius: 8px; z-index: 2000; max-height: 400px; overflow-y: auto; }
         .noti-item { padding: 12px; border-bottom: 1px solid #eee; font-size: 13px; cursor: pointer; background: #fff; }
-        .noti-item:hover { background: #f9f9f9; }
-        .noti-item.unread { background: #eefff5; border-left: 4px solid var(--primary); }
-
-        /* Login Dropdown */
+        
         .dropdown { position: relative; display: inline-block; }
         .login-btn { background: transparent; border: 1px solid var(--secondary); min-width: 90px; }
         .dropdown-content { display: none; position: absolute; right: 0; background: white; min-width: 160px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); z-index: 1001; border-radius: 8px; overflow: hidden; margin-top: 5px; }
         .dropdown-content a { padding: 12px; display: block; color: black; text-decoration: none; font-size: 14px; border-bottom: 1px solid #f1f1f1; }
-        .dropdown-content a:hover { background: #f1f5f9; }
         .show { display: block; }
 
         /* Product Grid */
@@ -48,9 +44,12 @@
 
         /* Modals */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
-        .modal-content { background: white; width: 95%; max-width: 450px; padding: 25px; border-radius: 12px; position: relative; }
+        .modal-content { background: white; width: 95%; max-width: 500px; padding: 25px; border-radius: 12px; position: relative; max-height: 90vh; overflow-y: auto; }
         .close { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; }
-        input, textarea, select { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        
+        /* Form Inputs */
+        input, textarea, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        .label-text { font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 4px; display: block; }
         .checkout-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
@@ -106,12 +105,37 @@
         <div class="modal-content">
             <span class="close" onclick="closeCheckoutModal()">&times;</span>
             <h3>Checkout</h3>
-            <div id="cart-items" style="max-height:150px; overflow-y:auto; margin-bottom:10px;"></div>
-            <h4 style="text-align:right;">Total: <span id="total">0</span> BDT</h4>
-            <input type="text" id="c_name" placeholder="Full Name">
-            <input type="text" id="c_phone" placeholder="Phone Number">
-            <input type="text" id="c_addr" placeholder="Full Address">
-            <button class="checkout-btn" onclick="order()">Confirm Order</button>
+            <div id="cart-items" style="max-height:100px; overflow-y:auto; margin-bottom:10px; border-bottom:1px solid #eee;"></div>
+            <h4 style="text-align:right; margin-bottom:15px;">Total: <span id="total">0</span> BDT</h4>
+            
+            <div style="background:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0;">
+                <span class="label-text">Contact Information</span>
+                <input type="text" id="c_name" placeholder="Full Name">
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="c_phone" placeholder="Phone Number" style="flex:1;">
+                    <input type="email" id="c_email" placeholder="Email Address" style="flex:1;">
+                </div>
+
+                <span class="label-text">Shipping Address</span>
+                <div style="display: flex; gap: 10px;">
+                    <select id="c_district" onchange="loadUpazilas()" style="flex:1;">
+                        <option value="">Select District</option>
+                    </select>
+                    <select id="c_upazila" style="flex:1;" disabled>
+                        <option value="">Select Upazila</option>
+                    </select>
+                </div>
+                <textarea id="c_addr" placeholder="House No, Road No, Village/Area"></textarea>
+                
+                <span class="label-text">Payment Method</span>
+                <select id="c_method">
+                    <option value="COD">Cash on Delivery</option>
+                    <option value="Bkash">Bkash</option>
+                    <option value="Nagad">Nagad</option>
+                </select>
+
+                <button class="checkout-btn" onclick="order()">Confirm Order</button>
+            </div>
         </div>
     </div>
 
@@ -120,8 +144,21 @@
         const defaults = [
             { id: 1, name: "Premium Watch", price: 2500, img: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=600" },
             { id: 2, name: "Leather Bag", price: 3200, img: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600" },
-            { id: 3, name: "Wireless Earbuds", price: 1800, img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600" }
+            { id: 3, name: "Wireless Earbuds", price: 1800, img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600" },
+            { id: 4, name: "Running Sneakers", price: 2100, img: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=600" }
         ];
+
+        // GEO DATA (Districts & Upazilas)
+        const bdLocations = {
+            "Dhaka": ["Savar", "Dhamrai", "Keraniganj", "Nawabganj", "Dohar", "Tejgaon", "Gulshan", "Mirpur", "Uttara", "Dhanmondi"],
+            "Chattogram": ["Chattogram Sadar", "Sitakunda", "Mirsharai", "Patiya", "Karnaphuli", "Hathazari"],
+            "Sylhet": ["Sylhet Sadar", "Beanibazar", "Bishwanath", "Golapganj"],
+            "Rajshahi": ["Rajshahi Sadar", "Paba", "Bagha", "Charghat"],
+            "Khulna": ["Khulna Sadar", "Dumuria", "Dighalia", "Rupsha"],
+            "Barishal": ["Barishal Sadar", "Bakerganj", "Babuganj"],
+            "Rangpur": ["Rangpur Sadar", "Mithapukur", "Pirganj"],
+            "Mymensingh": ["Mymensingh Sadar", "Muktagachha", "Valuka"]
+        };
 
         let products = JSON.parse(localStorage.getItem('products')) || defaults;
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -129,154 +166,45 @@
         let notifications = JSON.parse(localStorage.getItem('notifications')) || [];
         let isDirectBuy = false, directItem = null;
 
-        // Ensure defaults are saved if empty
+        // Ensure products exist in LocalStorage
         if(!localStorage.getItem('products')) localStorage.setItem('products', JSON.stringify(products));
 
         function init() {
             render();
             updateNav();
             checkNotifications();
-            // Polling for real-time like experience
+            
+            // Populate Districts
+            const distSelect = document.getElementById('c_district');
+            Object.keys(bdLocations).sort().forEach(d => {
+                let opt = document.createElement('option');
+                opt.value = d; opt.innerText = d;
+                distSelect.appendChild(opt);
+            });
+
             setInterval(checkNotifications, 1000); 
+        }
+
+        // Handle District Change
+        function loadUpazilas() {
+            const dist = document.getElementById('c_district').value;
+            const upaSelect = document.getElementById('c_upazila');
+            upaSelect.innerHTML = '<option value="">Select Upazila</option>';
+            
+            if(dist && bdLocations[dist]) {
+                upaSelect.disabled = false;
+                bdLocations[dist].forEach(u => {
+                    let opt = document.createElement('option');
+                    opt.value = u; opt.innerText = u;
+                    upaSelect.appendChild(opt);
+                });
+            } else {
+                upaSelect.disabled = true;
+            }
         }
 
         // --- RENDER PRODUCTS ---
         function render() {
             document.getElementById('product-grid').innerHTML = products.map(p => `
                 <div class="card">
-                    <img src="${p.img}" onerror="this.src='https://via.placeholder.com/300'">
-                    <div class="card-body">
-                        <div>${p.name}</div>
-                        <span class="card-price">${p.price} BDT</span>
-                        <div class="btn-group">
-                            <button class="btn btn-cart" onclick="addToCart(${p.id})">Add Cart</button>
-                            <button class="btn btn-buy" onclick="buyNow(${p.id})">Buy Now</button>
-                        </div>
-                    </div>
-                </div>`).join('');
-            document.getElementById('cart-count').innerText = cart.length;
-        }
-
-        // --- NOTIFICATIONS SYSTEM ---
-        function checkNotifications() {
-            if(!user) return;
-            // Reload from storage to get updates from Admin
-            notifications = JSON.parse(localStorage.getItem('notifications')) || [];
-            const myNotis = notifications.filter(n => n.userEmail === user.email).reverse();
-            
-            const badge = document.getElementById('noti-count');
-            const unread = myNotis.filter(n => !n.read).length;
-            badge.innerText = unread;
-            badge.style.display = unread > 0 ? 'block' : 'none';
-
-            let html = myNotis.length ? '' : '<p style="padding:15px; text-align:center; color:#777;">No notifications</p>';
-            myNotis.forEach(n => {
-                html += `<div class="noti-item ${n.read?'':'unread'}" onclick="readNoti(${n.id})">
-                    <strong>${n.title}</strong><br>${n.message}
-                    <div style="font-size:10px; color:#888; margin-top:5px;">${n.time}</div>
-                </div>`;
-            });
-            document.getElementById('noti-list').innerHTML = html;
-        }
-
-        function readNoti(id) {
-            const idx = notifications.findIndex(n => n.id === id);
-            if(idx !== -1) {
-                notifications[idx].read = true;
-                localStorage.setItem('notifications', JSON.stringify(notifications));
-                checkNotifications();
-            }
-        }
-        function toggleNoti() {
-            const el = document.getElementById('noti-dropdown');
-            el.style.display = el.style.display === 'block' ? 'none' : 'block';
-        }
-
-        // --- ORDER SYSTEM ---
-        function order() {
-            if(!user) { closeCheckoutModal(); openAuthModal(); return; }
-            const n = document.getElementById('c_name').value;
-            const p = document.getElementById('c_phone').value;
-            const a = document.getElementById('c_addr').value;
-            if(!n || !p || !a) return alert("Fill all info");
-
-            const items = isDirectBuy ? [directItem] : cart;
-            let itemStr = items.map(i=>i.name).join(", ");
-            let total = items.reduce((s,i)=>s+i.price, 0);
-
-            let orders = JSON.parse(localStorage.getItem('orders')) || [];
-            const newOrder = {
-                id: Date.now(),
-                userEmail: user.email, userName: n, phone: p,
-                items: itemStr, total: total, address: a, status: 'Pending',
-                time: new Date().toLocaleString()
-            };
-            orders.unshift(newOrder);
-            localStorage.setItem('orders', JSON.stringify(orders));
-
-            // Send Self Notification
-            const noti = {
-                id: Date.now(), userEmail: user.email,
-                title: "Order Placed ✅", message: `Order #${newOrder.id} is pending.`,
-                read: false, time: new Date().toLocaleString()
-            };
-            notifications.push(noti);
-            localStorage.setItem('notifications', JSON.stringify(notifications));
-
-            // WhatsApp
-            window.open(`https://wa.me/8801700000000?text=${encodeURIComponent(`New Order #${newOrder.id}\nItems: ${itemStr}\nTotal: ${total}`)}`);
-
-            if(!isDirectBuy) { cart=[]; localStorage.setItem('cart', JSON.stringify(cart)); render(); }
-            closeCheckoutModal(); alert("Order Placed!");
-        }
-
-        // --- HELPERS ---
-        function updateNav() {
-            if(user) {
-                document.getElementById('authBtn').innerText = user.name;
-                if(user.role === 'admin') document.getElementById('userDropdown').innerHTML += `<a href="admin.html" style="color:blue;">⚙️ Admin Panel</a>`;
-            }
-        }
-        function handleAuthBtn() { if(user) document.getElementById('userDropdown').classList.toggle('show'); else openAuthModal(); }
-        function login() {
-            const e = document.getElementById('l_email').value;
-            const p = document.getElementById('l_pass').value;
-            if(e==='sahimkhan11@gmail.com' && p==='1234') user={name:'Admin', email:e, role:'admin'};
-            else user={name:'User', email:e, role:'user'};
-            
-            localStorage.setItem('user', JSON.stringify(user));
-            closeAuth(); window.location.reload();
-        }
-        function logout() { localStorage.removeItem('user'); window.location.reload(); }
-        
-        function addToCart(id) { cart.push(products.find(x=>x.id===id)); localStorage.setItem('cart', JSON.stringify(cart)); render(); }
-        function buyNow(id) { directItem=products.find(x=>x.id===id); isDirectBuy=true; openCheckoutModal(); }
-        function openCartModal() { isDirectBuy=false; if(cart.length) openCheckoutModal(); else alert("Cart empty"); }
-        function openCheckoutModal() { 
-            document.getElementById('cart-modal').style.display='flex';
-            if(user) {
-                document.getElementById('c_name').value=user.name||''; 
-                document.getElementById('c_phone').value=user.phone||'';
-                document.getElementById('c_addr').value=user.address||'';
-            }
-            updateCheckout(); 
-        }
-        function updateCheckout() {
-            const items = isDirectBuy ? [directItem] : cart;
-            let t = 0;
-            document.getElementById('cart-items').innerHTML = items.map(i=>{t+=i.price; return `<div>${i.name} - ${i.price}</div>`}).join('');
-            document.getElementById('total').innerText=t;
-        }
-        function closeCheckoutModal() { document.getElementById('cart-modal').style.display='none'; }
-        function openAuthModal() { document.getElementById('auth-modal').style.display='flex'; }
-        function closeAuth() { document.getElementById('auth-modal').style.display='none'; }
-
-        window.onclick = function(e) {
-            if(!e.target.matches('.login-btn')) document.getElementById('userDropdown').classList.remove('show');
-            if(!e.target.closest('.noti-btn')) document.getElementById('noti-dropdown').style.display='none';
-        }
-
-        init();
-    </script>
-</body>
-</html>
+                    <img src="${p.img}" onerror="this.src='https://via.placeholder.
