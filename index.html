@@ -35,7 +35,7 @@
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-bottom: 50px; }
         .card { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.3s; }
         .card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .card img { width: 100%; height: 220px; object-fit: cover; }
+        .card img { width: 100%; height: 220px; object-fit: cover; cursor: pointer; }
         .card-body { padding: 15px; text-align: center; }
         .card-price { color: var(--primary); font-size: 18px; font-weight: bold; margin: 5px 0; display: block; }
         .btn-group { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
@@ -84,6 +84,10 @@
     <div class="hero">
         <h1>Welcome to Khan Enterprize</h1>
         <p>Premium Quality, Best Prices.</p>
+    </div>
+
+    <div style="text-align:center; margin-bottom:20px;">
+        <button onclick="hardReset()" style="background:#f59e0b; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold;">🔄 Refresh Products (Click if empty)</button>
     </div>
 
     <div class="container">
@@ -140,7 +144,7 @@
     </div>
 
     <script>
-        // --- DATA INITIALIZATION ---
+        // --- DEFAULT DATA (BACKUP) ---
         const defaults = [
             { id: 1, name: "Premium Watch", price: 2500, img: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=600" },
             { id: 2, name: "Leather Bag", price: 3200, img: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600" },
@@ -160,29 +164,66 @@
             "Mymensingh": ["Mymensingh Sadar", "Muktagachha", "Valuka"]
         };
 
-        let products = JSON.parse(localStorage.getItem('products')) || defaults;
+        // --- GLOBAL VARIABLES ---
+        let products = JSON.parse(localStorage.getItem('products'));
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
         let user = JSON.parse(localStorage.getItem('user'));
         let notifications = JSON.parse(localStorage.getItem('notifications')) || [];
         let isDirectBuy = false, directItem = null;
 
-        // Ensure products exist in LocalStorage
-        if(!localStorage.getItem('products')) localStorage.setItem('products', JSON.stringify(products));
-
+        // --- CRITICAL FIX: FORCE LOAD DEFAULTS IF EMPTY ---
         function init() {
+            if (!products || products.length === 0) {
+                console.log("No products found, loading defaults...");
+                products = defaults;
+                localStorage.setItem('products', JSON.stringify(products));
+            }
+            
             render();
             updateNav();
             checkNotifications();
             
             // Populate Districts
             const distSelect = document.getElementById('c_district');
-            Object.keys(bdLocations).sort().forEach(d => {
-                let opt = document.createElement('option');
-                opt.value = d; opt.innerText = d;
-                distSelect.appendChild(opt);
-            });
+            if(distSelect.options.length <= 1) { // Populate only if empty
+                Object.keys(bdLocations).sort().forEach(d => {
+                    let opt = document.createElement('option');
+                    opt.value = d; opt.innerText = d;
+                    distSelect.appendChild(opt);
+                });
+            }
 
             setInterval(checkNotifications, 1000); 
+        }
+
+        // --- RENDER PRODUCTS ---
+        function render() {
+            const grid = document.getElementById('product-grid');
+            if(products.length === 0) {
+                grid.innerHTML = '<p style="text-align:center;">No products available. Click "Refresh Products" above.</p>';
+            } else {
+                grid.innerHTML = products.map(p => `
+                    <div class="card">
+                        <img src="${p.img}" onerror="this.src='https://via.placeholder.com/300'">
+                        <div class="card-body">
+                            <div>${p.name}</div>
+                            <span class="card-price">${p.price} BDT</span>
+                            <div class="btn-group">
+                                <button class="btn btn-cart" onclick="addToCart(${p.id})">Add Cart</button>
+                                <button class="btn btn-buy" onclick="buyNow(${p.id})">Buy Now</button>
+                            </div>
+                        </div>
+                    </div>`).join('');
+            }
+            document.getElementById('cart-count').innerText = cart.length;
+        }
+
+        // --- MANUAL FIX BUTTON ---
+        function hardReset() {
+            if(confirm("This will restore default products. Continue?")) {
+                localStorage.setItem('products', JSON.stringify(defaults));
+                location.reload();
+            }
         }
 
         // Handle District Change
@@ -203,8 +244,126 @@
             }
         }
 
-        // --- RENDER PRODUCTS ---
-        function render() {
-            document.getElementById('product-grid').innerHTML = products.map(p => `
-                <div class="card">
-                    <img src="${p.img}" onerror="this.src='https://via.placeholder.
+        // --- NOTIFICATIONS ---
+        function checkNotifications() {
+            if(!user) return;
+            notifications = JSON.parse(localStorage.getItem('notifications')) || [];
+            const myNotis = notifications.filter(n => n.userEmail === user.email).reverse();
+            
+            const badge = document.getElementById('noti-count');
+            const unread = myNotis.filter(n => !n.read).length;
+            badge.innerText = unread;
+            badge.style.display = unread > 0 ? 'block' : 'none';
+
+            let html = myNotis.length ? '' : '<p style="padding:15px; text-align:center; color:#777;">No notifications</p>';
+            myNotis.forEach(n => {
+                html += `<div class="noti-item ${n.read?'':'unread'}" onclick="readNoti(${n.id})">
+                    <strong>${n.title}</strong><br>${n.message}
+                    <div style="font-size:10px; color:#888; margin-top:5px;">${n.time}</div>
+                </div>`;
+            });
+            document.getElementById('noti-list').innerHTML = html;
+        }
+        function readNoti(id) {
+            const idx = notifications.findIndex(n => n.id === id);
+            if(idx !== -1) { notifications[idx].read = true; localStorage.setItem('notifications', JSON.stringify(notifications)); checkNotifications(); }
+        }
+        function toggleNoti() { const el = document.getElementById('noti-dropdown'); el.style.display = el.style.display === 'block' ? 'none' : 'block'; }
+
+        // --- ORDER SYSTEM ---
+        function order() {
+            if(!user) { closeCheckoutModal(); openAuthModal(); return; }
+            
+            const n = document.getElementById('c_name').value;
+            const p = document.getElementById('c_phone').value;
+            const e = document.getElementById('c_email').value;
+            const dist = document.getElementById('c_district').value;
+            const upa = document.getElementById('c_upazila').value;
+            const addr = document.getElementById('c_addr').value;
+            const method = document.getElementById('c_method').value;
+
+            if(!n || !p || !e || !dist || !upa || !addr) return alert("Please fill all contact & address fields.");
+
+            const items = isDirectBuy ? [directItem] : cart;
+            let itemStr = items.map(i=>i.name).join(", ");
+            let total = items.reduce((s,i)=>s+i.price, 0);
+            
+            const fullAddress = `${addr}, ${upa}, ${dist}`;
+
+            let orders = JSON.parse(localStorage.getItem('orders')) || [];
+            const newOrder = {
+                id: Date.now(),
+                userEmail: user.email, userName: n, phone: p,
+                items: itemStr, total: total, 
+                address: fullAddress, 
+                method: method,
+                status: 'Pending',
+                time: new Date().toLocaleString()
+            };
+            orders.unshift(newOrder);
+            localStorage.setItem('orders', JSON.stringify(orders));
+
+            const noti = {
+                id: Date.now(), userEmail: user.email,
+                title: "Order Placed ✅", message: `Order #${newOrder.id} is pending confirmation.`,
+                read: false, time: new Date().toLocaleString()
+            };
+            notifications.push(noti);
+            localStorage.setItem('notifications', JSON.stringify(notifications));
+
+            const waMsg = `New Order #${newOrder.id}\nName: ${n}\nPhone: ${p}\nEmail: ${e}\nAddress: ${fullAddress}\nItems: ${itemStr}\nTotal: ${total} BDT\nMethod: ${method}`;
+            window.open(`https://wa.me/8801700000000?text=${encodeURIComponent(waMsg)}`);
+
+            if(!isDirectBuy) { cart=[]; localStorage.setItem('cart', JSON.stringify(cart)); render(); }
+            closeCheckoutModal(); alert("Order Placed Successfully!");
+        }
+
+        // --- HELPERS ---
+        function updateNav() {
+            if(user) {
+                document.getElementById('authBtn').innerText = user.name;
+                if(user.role === 'admin') document.getElementById('userDropdown').innerHTML += `<a href="admin.html" style="color:blue;">⚙️ Admin Panel</a>`;
+            }
+        }
+        function handleAuthBtn() { if(user) document.getElementById('userDropdown').classList.toggle('show'); else openAuthModal(); }
+        function login() {
+            const e = document.getElementById('l_email').value;
+            const p = document.getElementById('l_pass').value;
+            if(e==='sahimkhan11@gmail.com' && p==='1234') user={name:'Admin', email:e, role:'admin'};
+            else user={name:'User', email:e, role:'user'};
+            localStorage.setItem('user', JSON.stringify(user)); closeAuth(); window.location.reload();
+        }
+        function logout() { localStorage.removeItem('user'); window.location.reload(); }
+        
+        function addToCart(id) { cart.push(products.find(x=>x.id===id)); localStorage.setItem('cart', JSON.stringify(cart)); render(); }
+        function buyNow(id) { directItem=products.find(x=>x.id===id); isDirectBuy=true; openCheckoutModal(); }
+        function openCartModal() { isDirectBuy=false; if(cart.length) openCheckoutModal(); else alert("Cart empty"); }
+        
+        function openCheckoutModal() { 
+            document.getElementById('cart-modal').style.display='flex';
+            updateCheckout(); 
+            if(user) {
+                document.getElementById('c_name').value = user.name || '';
+                document.getElementById('c_phone').value = user.phone || '';
+                document.getElementById('c_email').value = user.email || '';
+            }
+        }
+        function updateCheckout() {
+            const items = isDirectBuy ? [directItem] : cart;
+            let t = 0;
+            document.getElementById('cart-items').innerHTML = items.map(i=>{t+=i.price; return `<div>${i.name} - ${i.price}</div>`}).join('');
+            document.getElementById('total').innerText=t;
+        }
+        function closeCheckoutModal() { document.getElementById('cart-modal').style.display='none'; }
+        function openAuthModal() { document.getElementById('auth-modal').style.display='flex'; }
+        function closeAuth() { document.getElementById('auth-modal').style.display='none'; }
+
+        window.onclick = function(e) {
+            if(!e.target.matches('.login-btn')) document.getElementById('userDropdown').classList.remove('show');
+            if(!e.target.closest('.noti-btn')) document.getElementById('noti-dropdown').style.display='none';
+        }
+
+        init();
+    </script>
+</body>
+</html>
