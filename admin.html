@@ -1,244 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel | Khan Enterprize</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        :root { --primary: #2563eb; --secondary: #1e293b; --danger: #ef4444; --success: #10b981; --bg: #f1f5f9; }
-        body { font-family: 'Poppins', sans-serif; margin: 0; background: var(--bg); color: #333; }
+// --- Firebase Config (Same as index.html) ---
+// ... (Firebase Initialize Code here) ...
+const db = firebase.firestore();
+
+// --- UPDATE STATUS FUNCTION ---
+function updateStatus(orderId, newStatus, userEmail) {
+    // 1. Update Order in Firestore
+    db.collection("orders").doc(orderId).update({
+        status: newStatus
+    }).then(() => {
+        // 2. Send Notification to User
+        let title = "Order Update 📦";
+        let msg = `Your order status has been updated to: ${newStatus}`;
         
-        /* Sidebar & Layout */
-        .admin-container { display: flex; min-height: 100vh; }
-        .sidebar { width: 250px; background: var(--secondary); color: white; padding: 20px; display: flex; flex-direction: column; }
-        .sidebar h2 { margin-bottom: 30px; text-transform: uppercase; letter-spacing: 1px; }
-        .menu-item { padding: 12px; cursor: pointer; border-radius: 5px; margin-bottom: 5px; transition: 0.3s; }
-        .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.1); }
-        .content { flex: 1; padding: 30px; overflow-y: auto; }
-        
-        /* Cards & Tables */
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .section-title { margin-top: 0; border-bottom: 2px solid var(--primary); display: inline-block; padding-bottom: 5px; margin-bottom: 20px; }
-        
-        /* Forms */
-        input, select, textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; color: white; font-weight: 600; }
-        .btn-add { background: var(--primary); }
-        .btn-del { background: var(--danger); padding: 5px 10px; font-size: 12px; }
-        
-        /* Table */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background: #f8fafc; }
-        
-        /* Status Badge */
-        .badge { padding: 4px 8px; border-radius: 20px; font-size: 11px; color: white; }
-        .bg-pending { background: #f59e0b; }
-        .bg-delivered { background: var(--success); }
-        .bg-cancelled { background: var(--danger); }
-    </style>
-</head>
-<body>
-
-    <div class="admin-container">
-        <div class="sidebar">
-            <h2>Admin Panel</h2>
-            <div class="menu-item active" onclick="showSection('products')">📦 Manage Products</div>
-            <div class="menu-item" onclick="showSection('orders')">📋 Manage Orders</div>
-            <div class="menu-item" onclick="logout()" style="margin-top:auto; background:var(--danger);">🚪 Logout</div>
-        </div>
-
-        <div class="content">
-            
-            <div id="products-section">
-                <div class="card">
-                    <h3 class="section-title">Add / Edit Product</h3>
-                    <input type="hidden" id="edit_id">
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                        <input type="text" id="p_name" placeholder="Product Name">
-                        <input type="number" id="p_price" placeholder="Price">
-                    </div>
-                    <input type="text" id="p_img" placeholder="Image URL">
-                    <input type="text" id="p_desc" placeholder="Details (Bangla)">
-                    <select id="p_status">
-                        <option value="true">In Stock</option>
-                        <option value="false">Out of Stock</option>
-                    </select>
-                    <button class="btn btn-add" onclick="saveProduct()">Save Product</button>
-                    <button class="btn" onclick="resetForm()" style="background:#666;">Clear</button>
-                </div>
-
-                <div class="card">
-                    <h3 class="section-title">Product List</h3>
-                    <table id="product-table">
-                        <thead>
-                            <tr>
-                                <th>Image</th>
-                                <th>Name</th>
-                                <th>Price</th>
-                                <th>Stock</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="product-list"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="orders-section" style="display:none;">
-                <div class="card">
-                    <h3 class="section-title">Customer Orders</h3>
-                    <table id="order-table">
-                        <thead>
-                            <tr>
-                                <th>Order ID</th>
-                                <th>Customer</th>
-                                <th>Items</th>
-                                <th>Total</th>
-                                <th>Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="order-list"></tbody>
-                    </table>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <script>
-        // --- 1. SECURITY CHECK ---
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (!user || user.role !== 'admin') {
-            alert("Access Denied! Admins only.");
-            window.location.href = 'index.html'; // Kick out if not admin
+        if(newStatus === "Delivered") {
+            title = "Order Delivered 🎉";
+            msg = "Your order has been successfully delivered. Thank you for shopping with us!";
+        } else if (newStatus === "Cancelled") {
+            title = "Order Cancelled ❌";
+            msg = "Your order has been cancelled. Please contact support for details.";
+        } else if (newStatus === "Confirmed") {
+            title = "Order Confirmed ✅";
+            msg = "We have received your order and are processing it.";
         }
 
-        // --- 2. DATA ---
-        let products = JSON.parse(localStorage.getItem('products')) || [];
-        let orders = JSON.parse(localStorage.getItem('orders')) || [];
+        db.collection("notifications").add({
+            userEmail: userEmail,
+            title: title,
+            message: msg,
+            read: false,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
 
-        // --- 3. TABS ---
-        function showSection(section) {
-            document.getElementById('products-section').style.display = section === 'products' ? 'block' : 'none';
-            document.getElementById('orders-section').style.display = section === 'orders' ? 'block' : 'none';
-            
-            // Update active menu
-            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
-            event.target.classList.add('active');
-        }
-
-        // --- 4. PRODUCT LOGIC ---
-        function renderProducts() {
-            const list = document.getElementById('product-list');
-            list.innerHTML = products.map(p => `
-                <tr>
-                    <td><img src="${p.img}" width="40" style="border-radius:4px;"></td>
-                    <td>${p.name}</td>
-                    <td>${p.price}</td>
-                    <td>${p.inStock ? '<span style="color:green">In Stock</span>' : '<span style="color:red">Out</span>'}</td>
-                    <td>
-                        <button class="btn-del" style="background:#3b82f6" onclick="editProduct(${p.id})">Edit</button>
-                        <button class="btn-del" onclick="deleteProduct(${p.id})">Del</button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function saveProduct() {
-            const id = document.getElementById('edit_id').value;
-            const name = document.getElementById('p_name').value;
-            const price = document.getElementById('p_price').value;
-            const img = document.getElementById('p_img').value;
-            const desc = document.getElementById('p_desc').value;
-            const inStock = document.getElementById('p_status').value === 'true';
-
-            if(!name || !price) return alert("Name and Price required");
-
-            if(id) {
-                // Update
-                const idx = products.findIndex(p => p.id == id);
-                products[idx] = { id: parseInt(id), name, price: parseInt(price), img, desc, inStock };
-            } else {
-                // Add New
-                products.push({ id: Date.now(), name, price: parseInt(price), img, desc, inStock });
-            }
-
-            localStorage.setItem('products', JSON.stringify(products));
-            renderProducts();
-            resetForm();
-            alert("Saved!");
-        }
-
-        function editProduct(id) {
-            const p = products.find(x => x.id === id);
-            document.getElementById('edit_id').value = p.id;
-            document.getElementById('p_name').value = p.name;
-            document.getElementById('p_price').value = p.price;
-            document.getElementById('p_img').value = p.img;
-            document.getElementById('p_desc').value = p.desc;
-            document.getElementById('p_status').value = p.inStock ? 'true' : 'false';
-        }
-
-        function deleteProduct(id) {
-            if(confirm("Delete this product?")) {
-                products = products.filter(p => p.id !== id);
-                localStorage.setItem('products', JSON.stringify(products));
-                renderProducts();
-            }
-        }
-
-        function resetForm() {
-            document.getElementById('edit_id').value = '';
-            document.getElementById('p_name').value = '';
-            document.getElementById('p_price').value = '';
-            document.getElementById('p_img').value = '';
-            document.getElementById('p_desc').value = '';
-        }
-
-        // --- 5. ORDER LOGIC ---
-        function renderOrders() {
-            const list = document.getElementById('order-list');
-            list.innerHTML = orders.map(o => {
-                let badgeClass = o.status === 'Delivered' ? 'bg-delivered' : (o.status === 'Cancelled' ? 'bg-cancelled' : 'bg-pending');
-                return `
-                <tr>
-                    <td>#${o.id.toString().slice(-6)}</td>
-                    <td>${o.userName}<br><small>${o.userEmail}</small></td>
-                    <td>${o.items.substring(0,20)}...</td>
-                    <td>${o.total}</td>
-                    <td><span class="badge ${badgeClass}">${o.status}</span></td>
-                    <td>
-                        <select onchange="updateStatus(${o.id}, this.value)" style="padding:2px; font-size:12px;">
-                            <option value="Pending" ${o.status==='Pending'?'selected':''}>Pending</option>
-                            <option value="Delivered" ${o.status==='Delivered'?'selected':''}>Delivered</option>
-                            <option value="Cancelled" ${o.status==='Cancelled'?'selected':''}>Cancelled</option>
-                        </select>
-                    </td>
-                </tr>`;
-            }).join('');
-        }
-
-        function updateStatus(id, status) {
-            const o = orders.find(x => x.id === id);
-            if(o) {
-                o.status = status;
-                localStorage.setItem('orders', JSON.stringify(orders));
-                renderOrders();
-            }
-        }
-
-        function logout() {
-            localStorage.removeItem('user');
-            window.location.href = 'index.html';
-        }
-
-        // Init
-        renderProducts();
-        renderOrders();
-
-    </script>
-</body>
-</html>
+        alert("Status Updated & Notification Sent!");
+        renderOrders(); // Refresh table
+    });
+}
