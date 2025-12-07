@@ -394,7 +394,7 @@
             const fullAddr = `${document.getElementById('c_addr').value}, ${document.getElementById('c_upa').value}, ${document.getElementById('c_dist').value}`;
             orders.unshift({ id:Date.now(), userName:document.getElementById('c_name').value, phone:document.getElementById('c_phone').value, userEmail:user.email, address:fullAddr, items:itemStr, total:total, status:'Pending', time:new Date().toLocaleString() });
             localStorage.setItem('orders', JSON.stringify(orders));
-            window.open(`https://wa.me/8801700000000?text=${encodeURIComponent(`Order: ${itemStr}\nTotal: ${total}\nAddr: ${fullAddr}`)}`);
+            window.open(`https://wa.me/8801303452829?text=${encodeURIComponent(`Order: ${itemStr}\nTotal: ${total}\nAddr: ${fullAddr}`)}`);
             if(!isBuyNow) { cart=[]; localStorage.setItem('cart', JSON.stringify(cart)); render(); }
             closeCart(); alert("Order Placed!");
         }
@@ -412,3 +412,4 @@
     </script>
 </body>
 </html>
+
