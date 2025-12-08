@@ -3,60 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel | Khan Enterprize</title>
+    <title>Admin Panel | Realtime</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        /* --- PREMIUM STYLES (SAME AS INDEX) --- */
         body { font-family: 'Poppins', sans-serif; padding: 20px; background: #f1f5f9; color: #333; }
         .container { max-width: 1200px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
-        .header h2 { margin: 0; color: #1e293b; }
         
         .tabs button { padding: 10px 25px; cursor: pointer; border: none; background: #e2e8f0; margin-right: 10px; border-radius: 8px; font-weight: 600; transition: 0.3s; }
         .tabs button.active { background: #2563eb; color: white; transform: scale(1.05); box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3); }
         
         .section { display: none; animation: fadeIn 0.5s; } .section.active { display: block; }
-        @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
-
+        @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+        
         .admin-form { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: #f8fafc; padding: 25px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
         .full { grid-column: span 2; }
-        
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-family: inherit; background: white; transition: 0.3s; }
-        input:focus, select:focus, textarea:focus { border-color: #2563eb; outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
-        
-        .upload-box { border: 2px dashed #94a3b8; padding: 20px; text-align: center; cursor: pointer; background: white; grid-column: span 2; border-radius: 10px; transition: 0.3s; }
-        .upload-box:hover { border-color: #2563eb; background: #eff6ff; }
-        .upload-preview { max-height: 100px; display: none; margin-top: 10px; border-radius: 5px; }
-
-        .btn { padding: 10px 20px; border: none; color: white; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; }
-        .btn:hover { transform: translateY(-2px); }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; }
+        .upload-box { border: 2px dashed #94a3b8; padding: 20px; text-align: center; cursor: pointer; background: white; grid-column: span 2; border-radius: 10px; }
+        .upload-preview { max-height: 100px; display: none; margin-top: 10px; }
+        .btn { padding: 10px 20px; border: none; color: white; border-radius: 6px; cursor: pointer; font-weight: 600; }
         .btn-add { background: #10b981; } .btn-del { background: #ef4444; } .btn-edit { background: #3b82f6; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; border-radius: 10px; overflow: hidden; }
-        th, td { padding: 15px; border-bottom: 1px solid #eee; text-align: left; vertical-align: middle; }
-        th { background: #f8fafc; font-weight: 600; color: #475569; }
-        tr:hover { background: #fdfdfd; }
-
-        /* STATUS BADGES */
-        select.status-drop { font-weight: bold; cursor: pointer; padding: 5px 10px; border-radius: 20px; border: 1px solid #ddd; }
-        .status-Pending { color: #f59e0b; }
-        .status-Confirmed { color: #2563eb; } /* Blue for Confirmed */
-        .status-Delivered { color: #10b981; }
-        .status-Cancelled { color: #ef4444; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 15px; border-bottom: 1px solid #eee; text-align: left; }
+        th { background: #f8fafc; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h2>⚙️ Admin Dashboard</h2>
-            <a href="index.html" class="btn" style="background:#2563eb; text-decoration:none;">Go to Shop</a>
-        </div>
-        
-        <div class="tabs">
-            <button class="active" onclick="tab('products')">📦 Manage Products</button>
-            <button onclick="tab('orders')">📋 Customer Orders</button>
-        </div>
+        <div class="header"><h2>⚙️ Admin Dashboard</h2><a href="index.html" style="text-decoration:none; color:blue;">Go to Shop</a></div>
+        <div class="tabs"><button class="active" onclick="tab('products')">📦 Products</button><button onclick="tab('orders')">📋 Orders</button></div>
 
         <div id="products" class="section active">
             <div class="admin-form">
@@ -64,118 +41,106 @@
                 <input type="text" id="pname" placeholder="Product Name">
                 <input type="number" id="pprice" placeholder="Price (BDT)">
                 <select id="pstock"><option value="true">In Stock</option><option value="false">Out of Stock</option></select>
-                <textarea id="pdesc" class="full" rows="3" placeholder="Product Details / Description"></textarea>
-                
+                <textarea id="pdesc" class="full" rows="3" placeholder="Product Details"></textarea>
                 <div class="upload-box" onclick="document.getElementById('pfile').click()">
                     <input type="file" id="pfile" hidden accept="image/*" onchange="imgH(this)">
-                    <span style="font-size:14px; color:#64748b;">📷 Click to Upload Image</span><br>
-                    <img id="pprev" class="upload-preview">
+                    <span>📷 Click to Upload Image</span><br><img id="pprev" class="upload-preview">
                 </div>
-                
-                <div class="full">
-                    <button class="btn btn-add" id="addBtn" onclick="addP()">Add Product</button>
-                    <button class="btn btn-edit" id="updBtn" onclick="addP()" style="display:none;">Update Product</button>
-                    <button class="btn" onclick="reset()" style="background:#64748b; margin-left:10px;">Clear</button>
-                </div>
+                <div class="full"><button class="btn btn-add" id="addBtn" onclick="addP()">Add Product</button> <button class="btn" onclick="reset()" style="background:#666;">Clear</button></div>
             </div>
             <table><thead><tr><th>Image</th><th>Info</th><th>Price</th><th>Stock</th><th>Action</th></tr></thead><tbody id="plist"></tbody></table>
         </div>
 
         <div id="orders" class="section">
-            <button class="btn" style="background:#f59e0b; margin-bottom:15px; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);" onclick="renderO()">🔄 Refresh Orders</button>
-            <table><thead><tr><th>ID</th><th>Customer</th><th>Address</th><th>Items</th><th>Status</th><th>Action</th></tr></thead><tbody id="olist"></tbody></table>
+            <table><thead><tr><th>Customer</th><th>Address</th><th>Items</th><th>Status</th><th>Action</th></tr></thead><tbody id="olist"></tbody></table>
         </div>
     </div>
 
     <script>
+        // ✅ YOUR FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7Ou-smtd4ZSQFuCLWudr1N2m6Mex0QIA",
+            authDomain: "khanshop-bd5a2.firebaseapp.com",
+            projectId: "khanshop-bd5a2",
+            storageBucket: "khanshop-bd5a2.firebasestorage.app",
+            messagingSenderId: "355701836562",
+            appId: "1:355701836562:web:b67d7d8722c442441501cb",
+            measurementId: "G-93M8HS7JYB"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         const user = JSON.parse(localStorage.getItem('user'));
         if(!user || user.role!=='admin') window.location.href="index.html";
-        
-        let products = JSON.parse(localStorage.getItem('products'))||[], orders = JSON.parse(localStorage.getItem('orders'))||[], curImg="";
 
-        function tab(t) { document.querySelectorAll('.section').forEach(e=>e.classList.remove('active')); document.querySelectorAll('.tabs button').forEach(e=>e.classList.remove('active')); document.getElementById(t).classList.add('active'); event.target.classList.add('active'); t==='products'?renderP():renderO(); }
-        
+        let curImg = "";
+
+        function tab(t) { document.querySelectorAll('.section').forEach(e=>e.classList.remove('active')); document.querySelectorAll('.tabs button').forEach(e=>e.classList.remove('active')); document.getElementById(t).classList.add('active'); event.target.classList.add('active'); }
         function imgH(i) { if(i.files[0]) { let r=new FileReader(); r.onload=e=>{curImg=e.target.result; document.getElementById('pprev').src=curImg; document.getElementById('pprev').style.display='block';}; r.readAsDataURL(i.files[0]); } }
-        
-        function addP() {
-            const n=document.getElementById('pname').value, p=document.getElementById('pprice').value, d=document.getElementById('pdesc').value, s=document.getElementById('pstock').value, id=document.getElementById('eid').value;
-            if(!n || !p) return alert("Name & Price required");
-            if(id) { const idx = products.findIndex(x=>x.id==id); products[idx] = { ...products[idx], name:n, price:parseInt(p), desc:d, inStock:s==='true', img:curImg||products[idx].img }; } 
-            else { products.push({ id:Date.now(), name:n, price:parseInt(p), desc:d, inStock:s==='true', img:curImg }); }
-            localStorage.setItem('products', JSON.stringify(products)); renderP(); reset();
-        }
 
-        function editP(id) {
-            const p=products.find(x=>x.id==id); document.getElementById('eid').value=id; document.getElementById('pname').value=p.name;
-            document.getElementById('pprice').value=p.price; document.getElementById('pdesc').value=p.desc||''; document.getElementById('pstock').value=p.inStock;
-            curImg=p.img; document.getElementById('pprev').src=p.img; document.getElementById('pprev').style.display='block';
-            document.getElementById('addBtn').style.display='none'; document.getElementById('updBtn').style.display='inline-block';
-        }
-        function delP(id) { if(confirm("Delete Product?")) { products=products.filter(x=>x.id!=id); localStorage.setItem('products', JSON.stringify(products)); renderP(); } }
-        function reset() { 
-            document.getElementById('pname').value=''; document.getElementById('pprice').value=''; document.getElementById('pdesc').value=''; document.getElementById('eid').value=''; 
-            curImg=''; document.getElementById('pprev').style.display='none'; 
-            document.getElementById('addBtn').style.display='inline-block'; document.getElementById('updBtn').style.display='none';
-        }
-
-        function renderP() {
-            document.getElementById('plist').innerHTML = products.map(p => `
-                <tr>
+        // REALTIME PRODUCTS
+        db.collection("products").onSnapshot((snap) => {
+            let html = "";
+            snap.forEach(doc => {
+                let p = doc.data();
+                html += `<tr>
                     <td><img src="${p.img}" width="50" style="border-radius:5px;"></td>
                     <td><b>${p.name}</b><br><small>${(p.desc||'').substring(0,30)}...</small></td>
-                    <td>${p.price} BDT</td>
-                    <td><span style="color:${p.inStock?'green':'red'}; font-weight:bold;">${p.inStock?'In Stock':'Out'}</span></td>
-                    <td><button class="btn btn-edit" onclick="editP(${p.id})">Edit</button> <button class="btn btn-del" onclick="delP(${p.id})">Del</button></td>
-                </tr>`).join('');
-        }
+                    <td>${p.price}</td>
+                    <td style="color:${p.inStock?'green':'red'}">${p.inStock?'In Stock':'Out'}</td>
+                    <td><button class="btn btn-del" onclick="delP('${doc.id}')">Del</button></td>
+                </tr>`;
+            });
+            document.getElementById('plist').innerHTML = html;
+        });
 
-        function renderO() {
-            orders = JSON.parse(localStorage.getItem('orders'))||[];
-            document.getElementById('olist').innerHTML = orders.map(o => `
-                <tr>
-                    <td>#${o.id.toString().slice(-4)}<br><small style="color:#888;">${o.time}</small></td>
+        function addP() {
+            const n=document.getElementById('pname').value, p=document.getElementById('pprice').value;
+            if(n && p) {
+                db.collection("products").add({
+                    name: n, price: parseInt(p), desc: document.getElementById('pdesc').value,
+                    inStock: document.getElementById('pstock').value==='true', img: curImg,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                reset(); alert("Product Added!");
+            }
+        }
+        function delP(id) { if(confirm("Delete?")) db.collection("products").doc(id).delete(); }
+        function reset() { document.getElementById('pname').value=''; document.getElementById('pprice').value=''; curImg=''; document.getElementById('pprev').style.display='none'; }
+
+        // REALTIME ORDERS
+        db.collection("orders").orderBy("timestamp", "desc").onSnapshot((snap) => {
+            let html = "";
+            snap.forEach(doc => {
+                let o = doc.data();
+                html += `<tr>
                     <td><b>${o.userName}</b><br>${o.phone}</td>
-                    <td style="font-size:13px;">${o.division}, ${o.district}<br>${o.upazila}, ${o.address}</td>
-                    <td>${o.items}<br><b>Total: ${o.total}</b></td>
+                    <td style="font-size:13px;">${o.address}</td>
+                    <td>${o.items}<br><b>${o.total} BDT</b></td>
                     <td>
-                        <select class="status-drop status-${o.status}" onchange="upS(${o.id},this.value)">
+                        <select onchange="upS('${doc.id}',this.value, '${o.userEmail}')">
                             <option value="Pending" ${o.status=='Pending'?'selected':''}>Pending</option>
-                            <option value="Confirmed" ${o.status=='Confirmed'?'selected':''}>Confirmed</option> <option value="Delivered" ${o.status=='Delivered'?'selected':''}>Delivered</option>
+                            <option value="Confirmed" ${o.status=='Confirmed'?'selected':''}>Confirmed</option>
+                            <option value="Delivered" ${o.status=='Delivered'?'selected':''}>Delivered</option>
                             <option value="Cancelled" ${o.status=='Cancelled'?'selected':''}>Cancelled</option>
                         </select>
                     </td>
-                    <td><button class="btn btn-del" onclick="delO(${o.id})">X</button></td>
-                </tr>`).join('');
+                    <td><button class="btn btn-del" onclick="delO('${doc.id}')">X</button></td>
+                </tr>`;
+            });
+            document.getElementById('olist').innerHTML = html;
+        });
+
+        function upS(id, status, email) {
+            db.collection("orders").doc(id).update({ status: status });
+            db.collection("notifications").add({
+                userEmail: email, title: `Order ${status}`, 
+                message: `Your order is now ${status}`, read: false, 
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
         }
-
-        // UPDATE STATUS & SEND NOTIFICATION
-        function upS(id, s) { 
-            const i=orders.findIndex(x=>x.id==id); 
-            if(i!=-1) { 
-                orders[i].status=s; 
-                localStorage.setItem('orders', JSON.stringify(orders)); 
-                
-                // SEND NOTIFICATION TO USER
-                let msg = `Your order #${id.toString().slice(-4)} status is updated to ${s}.`;
-                if(s === 'Confirmed') msg = "Your order has been Confirmed! 🟢 We are processing it.";
-                if(s === 'Delivered') msg = "Your order has been Delivered! 🎉 Thank you.";
-                if(s === 'Cancelled') msg = "Your order was Cancelled. ❌ Contact support.";
-
-                let notis = JSON.parse(localStorage.getItem('notifications')) || [];
-                notis.unshift({
-                    id: Date.now(), userEmail: orders[i].userEmail, 
-                    title: `Order ${s}`, message: msg, 
-                    read: false, time: new Date().toLocaleString()
-                });
-                localStorage.setItem('notifications', JSON.stringify(notis));
-                
-                renderO(); // Re-render to update color
-            } 
-        }
-
-        function delO(id) { if(confirm("Delete Order?")) { orders=orders.filter(x=>x.id!=id); localStorage.setItem('orders', JSON.stringify(orders)); renderO(); } }
-
-        renderP();
+        function delO(id) { if(confirm("Delete?")) db.collection("orders").doc(id).delete(); }
     </script>
 </body>
 </html>
