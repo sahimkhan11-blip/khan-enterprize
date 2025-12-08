@@ -11,70 +11,95 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* CSS VARIABLES */
+        /* --- CSS VARIABLES --- */
         :root { 
             --primary: #2563eb; 
             --secondary: #0f172a; 
             --accent: #f59e0b; 
             --bg: #f8fafc; 
             --white: #ffffff; 
-            --glass: rgba(255, 255, 255, 0.98); /* Increased opacity */
+            --glass: rgba(255, 255, 255, 0.98);
         }
         body { font-family: 'Poppins', sans-serif; margin: 0; background: var(--bg); color: #333; overflow-x: hidden; }
         
+        /* --- ANIMATIONS --- */
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
         /* ICONS */
         .icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: middle; }
 
-        /* NAV BAR (Fixed Z-Index) */
+        /* NAV BAR */
         nav { 
             background: var(--glass); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; 
             box-shadow: 0 4px 30px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; backdrop-filter: blur(10px);
+            animation: slideUp 0.5s ease-out;
         }
         .logo { font-size: 26px; font-weight: 800; color: var(--secondary); text-decoration: none; letter-spacing: -1px; text-transform: uppercase; }
         .nav-icons { display: flex; gap: 20px; align-items: center; }
         
-        .nav-btn { position: relative; cursor: pointer; color: var(--secondary); padding: 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
-        .nav-btn:hover { background: #e2e8f0; color: var(--primary); }
-        .badge { background: #ef4444; color: white; font-size: 10px; padding: 2px 5px; border-radius: 50%; position: absolute; top: 0; right: 0; font-weight: bold; border: 2px solid white; display: none; }
+        /* NAV BUTTONS */
+        .nav-btn { position: relative; cursor: pointer; color: var(--secondary); transition: 0.3s; padding: 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .nav-btn:hover { background: #e2e8f0; color: var(--primary); transform: scale(1.1); }
+        .badge { background: #ef4444; color: white; font-size: 10px; padding: 2px 5px; border-radius: 50%; position: absolute; top: -2px; right: -2px; border: 2px solid white; display: none; font-weight: bold; }
         
-        .contact-btn { padding: 10px 20px; border-radius: 30px; background: linear-gradient(135deg, #10b981, #059669); color: white; text-decoration: none; font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+        .contact-btn { 
+            padding: 10px 20px; border-radius: 30px; background: linear-gradient(135deg, #10b981, #059669); 
+            color: white; text-decoration: none; font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 8px;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); transition: 0.3s;
+        }
+        .contact-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); }
 
-        /* PROFILE & DROPDOWN (Fixed Positioning) */
-        .profile-container { position: relative; } /* Important for dropdown positioning */
+        /* PROFILE & DROPDOWN CONTAINERS */
+        .profile-container { position: relative; } /* Important for Dropdown */
         
         .profile-btn { 
             width: 45px; height: 45px; border-radius: 50%; background: #e2e8f0; 
             display: flex; align-items: center; justify-content: center; cursor: pointer; 
-            overflow: hidden; border: 2px solid transparent; transition: 0.3s;
+            transition: 0.3s; color: var(--secondary); overflow: hidden; border: 2px solid transparent;
         }
         .profile-btn:hover { border-color: var(--primary); transform: scale(1.05); }
         .profile-btn img { width: 100%; height: 100%; object-fit: cover; }
         .profile-initial { font-weight: bold; font-size: 20px; color: var(--primary); }
 
-        /* DROPDOWN MENU (Z-Index increased to 9999) */
+        /* DROPDOWN MENU (High Z-Index to stay on top) */
         .dropdown-menu { 
-            display: none; position: absolute; right: 0; top: 60px; 
+            display: none; position: absolute; right: 0; top: 130%; 
             background: white; min-width: 260px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); 
-            border-radius: 15px; overflow: hidden; z-index: 9999; border: 1px solid #e2e8f0;
+            border-radius: 15px; overflow: hidden; z-index: 9999; border: 1px solid #f1f5f9;
         }
-        .dropdown-menu.active { display: block; animation: popIn 0.2s ease; }
-        @keyframes popIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .dropdown-menu.active { display: block; animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         
-        .menu-header { padding: 15px; background: #f8fafc; border-bottom: 1px solid #eee; font-weight: bold; font-size: 14px; }
-        .menu-item { padding: 12px 20px; display: flex; align-items: center; gap: 10px; color: #333; text-decoration: none; font-size: 13px; border-bottom: 1px solid #f8fafc; transition: 0.2s; cursor: pointer; }
+        .menu-header { padding: 15px; background: #f8fafc; border-bottom: 1px solid #eee; }
+        .user-name { font-weight: bold; font-size: 15px; color: var(--secondary); display: block; }
+        .user-email { font-size: 12px; color: #64748b; }
+
+        .menu-item { padding: 12px 20px; display: flex; align-items: center; gap: 12px; color: #333; text-decoration: none; font-size: 14px; border-bottom: 1px solid #f8fafc; transition: 0.2s; cursor: pointer; }
         .menu-item:hover { background: #eff6ff; color: var(--primary); padding-left: 25px; }
-        
+        .menu-item svg { width: 18px; height: 18px; color: #64748b; transition: 0.2s; }
+        .menu-item:hover svg { color: var(--primary); }
+
         /* HERO & GRID */
-        .hero { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white; text-align: center; padding: 100px 20px; border-radius: 0 0 50px 50px; margin-bottom: 40px; }
-        .hero h1 { font-size: 3rem; margin: 0; font-weight: 800; }
+        .hero { 
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); 
+            color: white; text-align: center; padding: 100px 20px; border-radius: 0 0 50px 50px; margin-bottom: 40px; 
+            animation: slideUp 0.8s ease-out; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .hero h1 { font-size: 3.5rem; margin: 0; font-weight: 800; letter-spacing: -1px; }
         .container { max-width: 1200px; margin: auto; padding: 0 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-bottom: 50px; }
         
-        /* CARDS */
-        .card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #f1f5f9; box-shadow: 0 10px 25px rgba(0,0,0,0.05); transition: 0.4s; }
+        /* CARD */
+        .card { 
+            background: white; border-radius: 20px; overflow: hidden; border: 1px solid #f1f5f9;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0; animation: slideUp 0.6s ease forwards;
+        }
         .card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); border-color: var(--primary); }
-        .card img { width: 100%; height: 260px; object-fit: cover; cursor: pointer; }
+        .card img { width: 100%; height: 260px; object-fit: cover; cursor: pointer; transition: 0.5s; }
+        .card:hover img { transform: scale(1.05); }
         .card-body { padding: 20px; text-align: center; }
+        
         .stock-tag { font-size: 10px; padding: 4px 10px; border-radius: 20px; font-weight: 700; display: inline-block; text-transform: uppercase; }
         .in-stock { background: #dcfce7; color: #166534; } .out-stock { background: #fee2e2; color: #dc2626; }
 
@@ -82,15 +107,20 @@
         .btn { flex: 1; padding: 12px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.3s; }
         .btn:hover { transform: scale(1.05); }
         .btn-cart { background: #e2e8f0; color: var(--secondary); } 
-        .btn-buy { background: var(--accent); color: black; } 
-        .btn:disabled { background: #eee; cursor: not-allowed; opacity: 0.6; transform: none; }
+        .btn-buy { background: var(--accent); color: black; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3); } 
+        .btn:disabled { background: #eee; cursor: not-allowed; opacity: 0.6; transform: none; box-shadow: none; }
 
         /* MODALS */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 3000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-        .modal-content { background: white; width: 95%; max-width: 480px; padding: 30px; border-radius: 20px; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+        .modal-content { 
+            background: white; width: 95%; max-width: 480px; padding: 30px; border-radius: 20px; 
+            max-height: 90vh; overflow-y: auto; position: relative; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
         .large-modal { max-width: 800px; }
-        .close { position: absolute; top: 20px; right: 25px; font-size: 24px; cursor: pointer; }
-        
+        .close { position: absolute; top: 20px; right: 25px; font-size: 24px; cursor: pointer; color: #94a3b8; transition:0.3s; }
+        .close:hover { color: #ef4444; transform: rotate(90deg); }
+
         .auth-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; cursor: pointer; font-weight: 600; color: #64748b; border-bottom: 3px solid transparent; transition: 0.3s; }
         .tab-btn.active { color: var(--primary); border-color: var(--primary); }
@@ -100,13 +130,15 @@
         .divider { text-align: center; margin: 15px 0; font-size: 12px; color: #999; }
 
         input, textarea, select { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; background: #f8fafc; transition:0.3s; }
-        input:focus { border-color: var(--primary); background: white; outline: none; }
-        .checkout-btn { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; margin-top:10px; }
+        input:focus, textarea:focus { border-color: var(--primary); background: white; outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .checkout-btn { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 16px; transition:0.3s; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2); }
+        .checkout-btn:hover { background: #1d4ed8; transform: translateY(-2px); }
         
         .view-layout { display: flex; gap: 30px; flex-wrap: wrap; }
         .view-img { width: 100%; max-width: 350px; border-radius: 15px; object-fit: cover; }
         .view-info { flex: 1; }
         .row-3 { display: flex; gap: 10px; }
+        .error-msg { color: #ef4444; font-size: 12px; margin-top: -8px; margin-bottom: 10px; display: none; }
     </style>
 </head>
 <body>
@@ -119,7 +151,7 @@
             </a>
             
             <div class="profile-container">
-                <div class="nav-btn" onclick="toggleNoti()">
+                <div class="nav-btn" onclick="toggleNoti(event)">
                     <svg class="icon" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
                     <span class="badge" id="noti-count">0</span>
                 </div>
@@ -135,7 +167,7 @@
             </div>
 
             <div class="profile-container">
-                <div class="profile-btn" onclick="toggleProfile()" id="profileBtn">
+                <div class="profile-btn" onclick="toggleProfile(event)" id="profileBtn">
                     <svg class="icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 </div>
                 <div id="profile-menu" class="dropdown-menu"></div>
@@ -143,7 +175,7 @@
         </div>
     </nav>
 
-    <div class="hero"><h1>Welcome to Khan Enterprize</h1><p>Premium Quality. Best Prices.</p></div>
+    <div class="hero"><h1>Welcome to Khan Enterprize</h1><p>Premium Quality. Best Prices. Unmatched Service.</p></div>
     <div class="container"><div class="grid" id="product-grid"><p style="text-align:center; width:100%;">Loading Products...</p></div></div>
 
     <div class="modal" id="view-modal">
@@ -167,14 +199,16 @@
     <div class="modal" id="cart-modal">
         <div class="modal-content">
             <span class="close" onclick="closeCart()">&times;</span>
-            <h2 style="margin-top:0;">Checkout</h2>
+            <h2 id="c-title" style="margin-top:0;">Checkout</h2>
             <div id="cart-items" style="max-height:150px; overflow-y:auto; border-bottom:2px dashed #eee; margin-bottom:15px; padding-bottom:10px;"></div>
             <h3 style="text-align:right; color:var(--primary);">Total: <span id="total">0</span> BDT</h3>
+            
             <input type="text" id="c_name" placeholder="Full Name">
             <div class="row-3"><input type="text" id="c_phone" placeholder="Phone" style="flex:1;"><input type="email" id="c_email" placeholder="Email" style="flex:1;"></div>
             <select id="c_div" onchange="loadDist()"><option value="">Select Division</option></select>
             <div class="row-3"><select id="c_dist" onchange="loadUpa()" disabled style="flex:1;"><option>District</option></select><select id="c_upa" disabled style="flex:1;"><option>Upazila</option></select></div>
             <textarea id="c_addr" placeholder="Detailed Address"></textarea>
+            
             <button class="checkout-btn" onclick="order()">Confirm Order</button>
         </div>
     </div>
@@ -196,12 +230,12 @@
             <div id="register-box" style="display:none;">
                 <input type="text" id="r_name" placeholder="Full Name">
                 <input type="email" id="r_email" placeholder="Email Address">
-                <input type="password" id="r_pass" placeholder="Password">
+                <input type="password" id="r_pass" placeholder="Password (Min 8 Chars)">
                 <button class="checkout-btn" onclick="register()">Create Account</button>
             </div>
 
             <div class="divider">OR</div>
-            <button class="google-btn" onclick="alert('Google Sign In requires backend.')">
+            <button class="google-btn" onclick="alert('Google Sign In requires backend setup.')">
                 <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
                 Sign in with Google
             </button>
@@ -224,9 +258,9 @@
         const db = firebase.firestore();
 
         const geoData = {
-            "Dhaka": { "Dhaka": ["Savar", "Mirpur"], "Gazipur": ["Sadar"] }, 
-            "Chattogram": { "Chattogram": ["Sadar"] }, "Sylhet": { "Sylhet": ["Sadar"] }, 
-            "Rajshahi": { "Rajshahi": ["Sadar"] }, "Khulna": { "Khulna": ["Sadar"] },
+            "Dhaka": { "Dhaka": ["Savar", "Mirpur", "Dhanmondi"], "Gazipur": ["Sadar", "Tong"] },
+            "Chattogram": { "Chattogram": ["Sadar", "Patiya"], "Cox's Bazar": ["Sadar", "Ramu"] },
+            "Sylhet": { "Sylhet": ["Sadar"] }, "Rajshahi": { "Rajshahi": ["Sadar"] }, "Khulna": { "Khulna": ["Sadar"] },
             "Barishal": { "Barishal": ["Sadar"] }, "Rangpur": { "Rangpur": ["Sadar"] }, "Mymensingh": { "Mymensingh": ["Sadar"] }
         };
 
@@ -235,21 +269,18 @@
         let isBuyNow = false, directItem = null;
 
         function init() {
-            // REALTIME PRODUCTS
             db.collection("products").onSnapshot(snap => {
                 products = [];
                 snap.forEach(doc => products.push({ id: doc.id, ...doc.data() }));
                 render();
             });
             
-            // REALTIME NOTIFICATIONS (FIXED QUERY)
+            // REALTIME NOTIFICATIONS (FIXED)
             if(user) {
-                // Sorting client-side to avoid Index Error
                 db.collection("notifications").where("userEmail", "==", user.email).onSnapshot(snap => {
                     let notis = [];
                     snap.forEach(doc => notis.push({ id: doc.id, ...doc.data() }));
-                    
-                    // Sort by time descending
+                    // Client-side sort to avoid index error
                     notis.sort((a,b) => b.timestamp - a.timestamp);
                     
                     let html = "", count = 0;
@@ -274,6 +305,7 @@
             Object.keys(geoData).forEach(d => { let o=document.createElement('option'); o.value=d; o.innerText=d; document.getElementById('c_div').appendChild(o); });
         }
 
+        // AUTH & NAV (FIXED CLICK)
         function updateNav() {
             const menu = document.getElementById('profile-menu');
             const content = document.getElementById('profile-content');
@@ -304,8 +336,17 @@
             }
         }
 
-        function toggleProfile() { document.getElementById('profile-menu').classList.toggle('active'); document.getElementById('noti-menu').classList.remove('active'); }
-        function toggleNoti() { document.getElementById('noti-menu').classList.toggle('active'); document.getElementById('profile-menu').classList.remove('active'); }
+        // TOGGLE FUNCTIONS (FIXED)
+        function toggleProfile(e) { 
+            if(e) e.stopPropagation(); // Stop closing immediately
+            document.getElementById('profile-menu').classList.toggle('active'); 
+            document.getElementById('noti-menu').classList.remove('active'); 
+        }
+        function toggleNoti(e) { 
+            if(e) e.stopPropagation(); 
+            document.getElementById('noti-menu').classList.toggle('active'); 
+            document.getElementById('profile-menu').classList.remove('active'); 
+        }
         function markRead(id) { db.collection("notifications").doc(id).update({read:true}); }
 
         function tabAuth(t) {
@@ -314,8 +355,9 @@
             document.getElementById('register-box').style.display = t==='register'?'block':'none';
         }
         function login() { 
-            const e=document.getElementById('l_email').value; 
-            user={name:e.split('@')[0], email:e, role:e==='sahimkhan11@gmail.com'?'admin':'user'};
+            const e=document.getElementById('l_email').value, p=document.getElementById('l_pass').value;
+            if(e==='sahimkhan11@gmail.com' && p==='1234') user={name:'Admin', email:e, role:'admin'};
+            else user={name:'User', email:e, role:'user'};
             localStorage.setItem('user', JSON.stringify(user)); location.reload();
         }
         function register() {
@@ -374,6 +416,7 @@
             const items = isBuyNow ? [directItem] : cart;
             let itemStr = items.map(i=>i.name).join(", "), total = items.reduce((s,i)=>s+i.price,0);
             
+            // SAVE ORDER
             db.collection("orders").add({
                 userName: n, phone: p, userEmail: user.email,
                 address: `${document.getElementById('c_addr').value}, ${document.getElementById('c_upa').value}, ${document.getElementById('c_dist').value}`,
@@ -382,6 +425,7 @@
                 time: new Date().toLocaleString()
             });
 
+            // SELF NOTIFICATION
             db.collection("notifications").add({
                 userEmail: user.email, title: "Order Placed 📦", 
                 message: `Order #${Date.now().toString().slice(-4)} is pending confirmation.`, 
